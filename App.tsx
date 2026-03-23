@@ -1,8 +1,3 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import { GoogleGenAI } from "@google/genai";
 import React, { useEffect, useRef, useState, useCallback, Suspense } from 'react';
 import * as THREE from 'three';
@@ -447,9 +442,18 @@ export default function App() {
     return distTip > distKnuckle;
   };
 
-  // Initial Loading
+  // Initial Loading + pre-request mic permission
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 2000);
+    // Pre-request microphone permission so users aren't prompted mid-experience
+    navigator.mediaDevices?.getUserMedia({ audio: true })
+      .then(stream => {
+        // Immediately release the mic stream — we just needed the permission grant
+        stream.getTracks().forEach(track => track.stop());
+      })
+      .catch(() => {
+        // Permission denied or not available — voice input will gracefully degrade
+      });
     return () => clearTimeout(timer);
   }, []);
 
@@ -848,12 +852,9 @@ export default function App() {
               className="relative z-10 text-center px-6 max-w-4xl"
             >
               <div className="mb-12 flex justify-center">
-                <div className="w-24 h-24 border border-white/20 rounded-full flex items-center justify-center p-4 bg-black relative group">
+                <div className="w-24 h-24 rounded-full flex items-center justify-center bg-black relative group overflow-hidden">
                   <div className="absolute inset-0 bg-cyan-400/20 rounded-full blur-xl group-hover:bg-cyan-400/40 transition-all" />
-                  <svg viewBox="0 0 100 100" className="w-full h-full relative z-10">
-                    <path d="M50 5 L95 27.5 L95 72.5 L50 95 L5 72.5 L5 27.5 Z" fill="none" stroke="white" strokeWidth="4" />
-                    <text x="50" y="65" textAnchor="middle" fontSize="45" fontWeight="900" fill="white" fontFamily="sans-serif">G</text>
-                  </svg>
+                  <img src="/gitwixlogo.jpg" alt="Gitwix" className="w-full h-full object-contain relative z-10" />
                 </div>
               </div>
 
@@ -1025,11 +1026,8 @@ export default function App() {
       {/* Navigation Bar */}
       <nav className={`fixed top-0 left-0 right-0 z-40 px-12 py-10 flex items-center justify-between transition-all duration-1000 ${mode === 'intro' ? 'opacity-0 -translate-y-10' : 'opacity-100 translate-y-0'}`}>
         <div className="text-2xl font-serif italic tracking-tighter cursor-pointer flex items-center gap-4 group" onClick={() => setCurrentPage('home')}>
-          <div className="w-12 h-12 border border-white/20 rounded-full flex items-center justify-center transition-all group-hover:border-white group-hover:bg-white overflow-hidden p-2 bg-black">
-            <svg viewBox="0 0 100 100" className="w-full h-full group-hover:invert transition-all">
-              <path d="M50 5 L95 27.5 L95 72.5 L50 95 L5 72.5 L5 27.5 Z" fill="none" stroke="white" strokeWidth="4" />
-              <text x="50" y="65" textAnchor="middle" fontSize="45" fontWeight="900" fill="white" fontFamily="sans-serif">G</text>
-            </svg>
+          <div className="w-12 h-12 rounded-full flex items-center justify-center transition-all overflow-hidden bg-black">
+            <img src="/gitwixlogo.jpg" alt="Gitwix" className="w-full h-full object-contain" />
           </div>
           <span className="tracking-[0.2em] font-sans font-black text-sm">GITWIX</span>
         </div>

@@ -1,9 +1,5 @@
 {
   "name": "Gitwix Digital Agency",
-  "description": "A high-performance digital agency landing page with immersive AI-driven interactions and hand-tracking navigation.",
-  "requestFramePermissions": [
-    "camera",
-    "microphone",
-    "geolocation"
-  ]
+  "description": "A high-performance digital agency landing page with immersive 3D environments, hand-tracking navigation, and AI-driven interactions.",
+  "author": "Gitwix"
 }
