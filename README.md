@@ -1,20 +1,28 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Gitwix Digital Agency
 
-# Run and deploy your AI Studio app
+A high-performance digital agency landing page featuring immersive 3D environments and AI-driven interactions.
 
-This contains everything you need to run your app locally.
+## 🚀 Vercel Deployment
 
-View your app in AI Studio: https://ai.studio/apps/4f8dc31e-7873-45a8-978a-af5cde9e9a6c
+To deploy this project to Vercel from GitHub:
 
-## Run Locally
+1. **Push to GitHub**: Ensure your code is in a GitHub repository.
+2. **Import to Vercel**: Go to [vercel.com/new](https://vercel.com/new) and select your repository.
+3. **Configure Environment Variables**:
+   - In the Vercel dashboard, go to **Settings > Environment Variables**.
+   - Add `GEMINI_API_KEY` with your Google AI Studio API key.
+4. **Deploy**: Click **Deploy**. Vercel will automatically detect the Vite configuration.
 
-**Prerequisites:**  Node.js
+## 🛠 Tech Stack
 
+- **React 19**
+- **Three.js / React Three Fiber** (for 3D environments)
+- **Framer Motion** (for animations)
+- **Tailwind CSS** (for styling)
+- **MediaPipe** (for hand tracking)
+- **Google Gemini AI** (ready for integration)
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## 🔑 Environment Variables
+
+- `GEMINI_API_KEY`: Required for AI features.
+- `APP_URL`: Automatically handled by Vercel/AI Studio.
