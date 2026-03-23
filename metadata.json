@@ -1,0 +1,5 @@
+{
+  "name": "Hand Gesture Interface",
+  "description": "A simple, minimalist hand-controlled interface. Hand open to scroll, hand closed to stop, pinch to click.",
+  "requestFramePermissions": ["camera", "microphone"]
+}
