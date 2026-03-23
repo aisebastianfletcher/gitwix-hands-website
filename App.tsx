@@ -6,7 +6,7 @@ import { Float, Text, MeshDistortMaterial, Sphere, PerspectiveCamera, Environmen
 import { Hands, Results, HAND_CONNECTIONS } from '@mediapipe/hands';
 import { Camera } from '@mediapipe/camera_utils';
 import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
-import { Loader2, MousePointer2, Hand, ArrowDown, Sparkles, Globe, Layers, Mail, Activity, Zap, Shield, ArrowRight, ChevronRight, Play, ExternalLink, Mic, MicOff, Volume2 } from 'lucide-react';
+import { Loader2, MousePointer2, Hand, ArrowDown, Sparkles, Globe, Layers, Mail, Activity, Zap, Shield, ArrowRight, ChevronRight, Play, ExternalLink, Volume2 } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useSpring, useTransform } from 'motion/react';
 
 // --- CONSTANTS ---
@@ -167,72 +167,82 @@ function Scene({ scrollProgress, cursorPos, currentPage }: { scrollProgress: any
 
 // --- VOICE INPUT COMPONENT ---
 
-function VoiceInput({ onTranscript, placeholder }: { onTranscript: (text: string) => void, placeholder: string }) {
+// Hook: auto-start speech recognition on field focus, show "Speak now" overlay
+function useVoiceField(isEmail: boolean = false) {
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const callbackRef = useRef<((text: string) => void) | null>(null);
 
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'en-US';
+      const rec = new SpeechRecognition();
+      rec.continuous = false;
+      rec.interimResults = false;
+      rec.lang = 'en-US';
 
-      recognitionRef.current.onresult = (event: any) => {
+      rec.onresult = (event: any) => {
         let transcript = event.results[0][0].transcript;
-        
-        // Email logic: "john doe at gmail dot com" -> "johndoe@gmail.com"
-        if (placeholder.toLowerCase().includes('email')) {
+        if (isEmail) {
           transcript = transcript.toLowerCase()
             .replace(/\s+at\s+/g, '@')
             .replace(/\s+dot\s+/g, '.')
             .replace(/\s+/g, '');
-          
-          // Smart domain logic
           if (!transcript.includes('@')) {
-            // If they said "gmail", fix it
             if (transcript.includes('gmail')) {
               transcript = transcript.replace('gmail', '@gmail.com');
             } else {
               transcript += '@gmail.com';
             }
           }
-          // Clean up double @ if they said "at gmail dot com" and logic was redundant
           transcript = transcript.replace(/@@/g, '@');
         }
-        
-        onTranscript(transcript);
+        callbackRef.current?.(transcript);
         setIsListening(false);
       };
-
-      recognitionRef.current.onerror = () => setIsListening(false);
-      recognitionRef.current.onend = () => setIsListening(false);
+      rec.onerror = () => setIsListening(false);
+      rec.onend = () => setIsListening(false);
+      recognitionRef.current = rec;
     }
-  }, [onTranscript, placeholder]);
+  }, [isEmail]);
 
-  const toggleListening = () => {
-    if (isListening) {
-      recognitionRef.current?.stop();
-    } else {
-      recognitionRef.current?.start();
-      setIsListening(true);
+  const startListening = useCallback((onResult: (text: string) => void) => {
+    if (recognitionRef.current && !isListening) {
+      callbackRef.current = onResult;
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (e) {
+        // Already started or not available
+      }
     }
-  };
+  }, [isListening]);
 
-  if (!recognitionRef.current) return null;
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current && isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+  }, [isListening]);
 
-  return (
-    <button
-      type="button"
-      onClick={toggleListening}
-      className={`p-2 rounded-full transition-all ${isListening ? 'bg-white text-black animate-pulse' : 'bg-white/5 text-white/40 hover:text-white'}`}
-      title="Speak instead of typing"
-    >
-      {isListening ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
-    </button>
-  );
+  return { isListening, startListening, stopListening, supported: !!recognitionRef.current };
 }
+
+const SpeakNowBadge = ({ visible }: { visible: boolean }) => (
+  <AnimatePresence>
+    {visible && (
+      <motion.div
+        initial={{ opacity: 0, y: 4, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 4, scale: 0.95 }}
+        className="absolute -top-8 left-0 flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-full z-20"
+      >
+        <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse" />
+        <span className="text-[9px] uppercase tracking-[0.3em] text-cyan-400 font-bold">Speak now</span>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
 
 // --- ANIMATED TEXT COMPONENTS ---
 
@@ -363,6 +373,11 @@ export default function App() {
   const [isRefining, setIsRefining] = useState(false);
   const [clickFeedback, setClickFeedback] = useState<{ x: number, y: number } | null>(null);
   const [toast, setToast] = useState({ show: false, message: '' });
+
+  // Voice field hooks (one per field so they each track their own listening state)
+  const voiceName = useVoiceField();
+  const voiceEmail = useVoiceField(true);
+  const voiceDetails = useVoiceField();
 
   const handleAIRefine = async () => {
     if (!formData.details) return;
@@ -854,7 +869,7 @@ export default function App() {
               <div className="mb-12 flex justify-center">
                 <div className="w-24 h-24 rounded-full flex items-center justify-center bg-black relative group overflow-hidden">
                   <div className="absolute inset-0 bg-cyan-400/20 rounded-full blur-xl group-hover:bg-cyan-400/40 transition-all" />
-                  <img src="/gitwixlogo.jpg" alt="Gitwix" className="w-full h-full object-contain relative z-10" />
+                  <img src="/gitwixlogo.png" alt="Gitwix" className="w-full h-full object-contain relative z-10" />
                 </div>
               </div>
 
@@ -1027,7 +1042,7 @@ export default function App() {
       <nav className={`fixed top-0 left-0 right-0 z-40 px-12 py-10 flex items-center justify-between transition-all duration-1000 ${mode === 'intro' ? 'opacity-0 -translate-y-10' : 'opacity-100 translate-y-0'}`}>
         <div className="text-2xl font-serif italic tracking-tighter cursor-pointer flex items-center gap-4 group" onClick={() => setCurrentPage('home')}>
           <div className="w-12 h-12 rounded-full flex items-center justify-center transition-all overflow-hidden bg-black">
-            <img src="/gitwixlogo.jpg" alt="Gitwix" className="w-full h-full object-contain" />
+            <img src="/gitwixlogo.png" alt="Gitwix" className="w-full h-full object-contain" />
           </div>
           <span className="tracking-[0.2em] font-sans font-black text-sm">GITWIX</span>
         </div>
@@ -1278,61 +1293,61 @@ export default function App() {
                       setTimeout(() => setToast({ show: false, message: '' }), 5000);
                     }}>
                       <div className="space-y-8">
-                        <div className="border-b border-white/10 pb-4 focus-within:border-white transition-colors flex items-end justify-between">
-                          <div className="flex-1">
-                            <label className="text-[10px] uppercase tracking-widest text-white/30 block mb-2">Your Name</label>
-                            <input 
-                              type="text" 
-                              required 
-                              value={formData.name}
-                              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                              className="w-full bg-transparent outline-none text-xl font-serif italic placeholder:text-white/10" 
-                              placeholder="Alexander Wright" 
-                            />
-                          </div>
-                          <VoiceInput onTranscript={(text) => setFormData({ ...formData, name: text })} placeholder="Your Name" />
+                        <div className="relative border-b border-white/10 pb-4 focus-within:border-white transition-colors">
+                          <SpeakNowBadge visible={voiceName.isListening} />
+                          <label className="text-[10px] uppercase tracking-widest text-white/30 block mb-2">Your Name</label>
+                          <input 
+                            type="text" 
+                            required 
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            onFocus={() => voiceName.startListening((text) => setFormData(prev => ({ ...prev, name: text })))}
+                            onBlur={() => voiceName.stopListening()}
+                            className="w-full bg-transparent outline-none text-xl font-serif italic placeholder:text-white/10" 
+                            placeholder="Alexander Wright" 
+                          />
                         </div>
-                        <div className="border-b border-white/10 pb-4 focus-within:border-white transition-colors flex items-end justify-between">
-                          <div className="flex-1">
-                            <label className="text-[10px] uppercase tracking-widest text-white/30 block mb-2">Email Address</label>
-                            <input 
-                              type="email" 
-                              required 
-                              value={formData.email}
-                              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                              className="w-full bg-transparent outline-none text-xl font-serif italic placeholder:text-white/10" 
-                              placeholder="alex@empire.com" 
-                            />
-                          </div>
-                          <VoiceInput onTranscript={(text) => setFormData({ ...formData, email: text })} placeholder="Email Address" />
+                        <div className="relative border-b border-white/10 pb-4 focus-within:border-white transition-colors">
+                          <SpeakNowBadge visible={voiceEmail.isListening} />
+                          <label className="text-[10px] uppercase tracking-widest text-white/30 block mb-2">Email Address</label>
+                          <input 
+                            type="email" 
+                            required 
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            onFocus={() => voiceEmail.startListening((text) => setFormData(prev => ({ ...prev, email: text })))}
+                            onBlur={() => voiceEmail.stopListening()}
+                            className="w-full bg-transparent outline-none text-xl font-serif italic placeholder:text-white/10" 
+                            placeholder="alex@empire.com" 
+                          />
                         </div>
-                        <div className="border-b border-white/10 pb-4 focus-within:border-white transition-colors flex items-end justify-between">
-                          <div className="flex-1">
-                            <label className="text-[10px] uppercase tracking-widest text-white/30 block mb-2">Project Details</label>
-                            <textarea 
-                              rows={3} 
-                              value={formData.details}
-                              onChange={(e) => setFormData({ ...formData, details: e.target.value })}
-                              className="w-full bg-transparent outline-none text-xl font-serif italic placeholder:text-white/10 resize-none" 
-                              placeholder="Tell us about your vision..." 
-                            />
-                            {formData.details && (
-                              <button
-                                type="button"
-                                onClick={handleAIRefine}
-                                disabled={isRefining}
-                                className="mt-4 flex items-center gap-2 text-[9px] uppercase tracking-widest text-cyan-400 hover:text-white transition-colors disabled:opacity-50"
-                              >
-                                {isRefining ? (
-                                  <Loader2 className="w-3 h-3 animate-spin" />
-                                ) : (
-                                  <Sparkles className="w-3 h-3" />
-                                )}
-                                {isRefining ? 'Refining...' : 'Refine with AI'}
-                              </button>
-                            )}
-                          </div>
-                          <VoiceInput onTranscript={(text) => setFormData({ ...formData, details: text })} placeholder="Project Details" />
+                        <div className="relative border-b border-white/10 pb-4 focus-within:border-white transition-colors">
+                          <SpeakNowBadge visible={voiceDetails.isListening} />
+                          <label className="text-[10px] uppercase tracking-widest text-white/30 block mb-2">Project Details</label>
+                          <textarea 
+                            rows={3} 
+                            value={formData.details}
+                            onChange={(e) => setFormData({ ...formData, details: e.target.value })}
+                            onFocus={() => voiceDetails.startListening((text) => setFormData(prev => ({ ...prev, details: text })))}
+                            onBlur={() => voiceDetails.stopListening()}
+                            className="w-full bg-transparent outline-none text-xl font-serif italic placeholder:text-white/10 resize-none" 
+                            placeholder="Tell us about your vision..." 
+                          />
+                          {formData.details && (
+                            <button
+                              type="button"
+                              onClick={handleAIRefine}
+                              disabled={isRefining}
+                              className="mt-4 flex items-center gap-2 text-[9px] uppercase tracking-widest text-cyan-400 hover:text-white transition-colors disabled:opacity-50"
+                            >
+                              {isRefining ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <Sparkles className="w-3 h-3" />
+                              )}
+                              {isRefining ? 'Refining...' : 'Refine with AI'}
+                            </button>
+                          )}
                         </div>
                       </div>
                       <button type="submit" className="w-full py-6 bg-white text-black font-sans font-black uppercase tracking-[0.3em] text-xs rounded-full hover:bg-white/90 transition-all active:scale-95">
