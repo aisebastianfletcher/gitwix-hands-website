@@ -33,6 +33,39 @@
   }
 }
 
+/* --- HAND HOVER SIMULATION ---
+ * Replicates Tailwind hover: and group-hover: effects
+ * when the .hand-hover class is applied by hand tracking.
+ */
+
+/* Direct hover effects (hover:*) */
+.hand-hover.hover\:bg-white\/5 { background-color: rgb(255 255 255 / 0.05); }
+.hand-hover.hover\:bg-white\/90 { background-color: rgb(255 255 255 / 0.9); }
+.hand-hover.hover\:border-white\/40 { border-color: rgb(255 255 255 / 0.4); }
+.hand-hover.hover\:scale-105 { transform: scale(1.05); }
+.hand-hover.hover\:text-white { color: rgb(255 255 255); }
+.hand-hover.hover\:text-white\/60 { color: rgb(255 255 255 / 0.6); }
+
+/* Group hover effects (group-hover:*) — triggered when ancestor .group has .hand-hover */
+.group.hand-hover .group-hover\:bg-cyan-400\/40 { background-color: rgb(34 211 238 / 0.4); }
+.group.hand-hover .group-hover\:bg-transparent { background-color: transparent; }
+.group.hand-hover .group-hover\:bg-white { background-color: rgb(255 255 255); }
+.group.hand-hover .group-hover\:border-cyan-400 { border-color: rgb(34 211 238); }
+.group.hand-hover .group-hover\:border-white { border-color: rgb(255 255 255); }
+.group.hand-hover .group-hover\:grayscale-0 { filter: grayscale(0); }
+.group.hand-hover .group-hover\:h-48 { height: 12rem; }
+.group.hand-hover .group-hover\:invert { filter: invert(1); }
+.group.hand-hover .group-hover\:opacity-100 { opacity: 1; }
+.group.hand-hover .group-hover\:scale-105 { transform: scale(1.05); }
+.group.hand-hover .group-hover\:scale-110 { transform: scale(1.1); }
+.group.hand-hover .group-hover\:text-black { color: rgb(0 0 0); }
+.group.hand-hover .group-hover\:text-cyan-400 { color: rgb(34 211 238); }
+.group.hand-hover .group-hover\:text-white { color: rgb(255 255 255); }
+.group.hand-hover .group-hover\:translate-x-2 { transform: translateX(0.5rem); }
+.group.hand-hover .group-hover\:translate-y-0 { transform: translateY(0); }
+.group.hand-hover .group-hover\:w-64 { width: 16rem; }
+.group.hand-hover .group-hover\:w-full { width: 100%; }
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 4px;

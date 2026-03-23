@@ -23,6 +23,7 @@ const TRACKING_LOST_TIMEOUT = 1000;
 const CURSOR_RANGE_SCALE = 1.8; 
 const MAGNETIC_RADIUS = 100; // Radius in pixels for magnetic click
 const STAR_COUNT = 1000;
+const HAND_HOVER_CLASS = 'hand-hover';
 
 type Page = 'home' | 'services' | 'portfolio' | 'book';
 
@@ -423,6 +424,7 @@ export default function App() {
   const interactionModeRef = useRef<'scroll' | 'click'>('scroll');
   const wasTapping = useRef<boolean>(false);
   const universeRef = useRef<any>(null);
+  const lastHoveredElement = useRef<HTMLElement | null>(null);
   
   // Scroll Momentum Refs
   const targetScrollY = useRef<number>(0);
@@ -648,6 +650,45 @@ export default function App() {
           setCursorPos({ x: smoothedPos.current.x, y: smoothedPos.current.y });
         }
 
+        // --- HAND HOVER SIMULATION ---
+        const hx = magneticElement ? (magneticElement.getBoundingClientRect().left + magneticElement.getBoundingClientRect().width / 2) : smoothedPos.current.x;
+        const hy = magneticElement ? (magneticElement.getBoundingClientRect().top + magneticElement.getBoundingClientRect().height / 2) : smoothedPos.current.y;
+        const hoveredEl = (magneticElement || document.elementFromPoint(hx, hy)) as HTMLElement | null;
+        // Walk up to find the nearest interactive/group ancestor
+        const findHoverTarget = (el: HTMLElement | null): HTMLElement | null => {
+          let current = el;
+          while (current && current !== document.body) {
+            if (current.matches('button, a, [role="button"], .group, input, textarea')) return current;
+            // Also check if parent is a .group (for card hover effects)
+            if (current.parentElement?.matches('.group')) return current.parentElement;
+            current = current.parentElement as HTMLElement | null;
+          }
+          return el;
+        };
+        const hoverTarget = findHoverTarget(hoveredEl);
+
+        if (lastHoveredElement.current !== hoverTarget) {
+          // Remove hover from previous element and its ancestors
+          if (lastHoveredElement.current) {
+            lastHoveredElement.current.classList.remove(HAND_HOVER_CLASS);
+            lastHoveredElement.current.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+            lastHoveredElement.current.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
+            // Also remove from ancestor .group elements
+            let ancestor = lastHoveredElement.current.closest('.group') as HTMLElement | null;
+            if (ancestor) ancestor.classList.remove(HAND_HOVER_CLASS);
+          }
+          // Add hover to new element
+          if (hoverTarget) {
+            hoverTarget.classList.add(HAND_HOVER_CLASS);
+            hoverTarget.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+            hoverTarget.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+            // Also add to ancestor .group elements
+            let ancestor = hoverTarget.closest('.group') as HTMLElement | null;
+            if (ancestor && ancestor !== hoverTarget) ancestor.classList.add(HAND_HOVER_CLASS);
+          }
+          lastHoveredElement.current = hoverTarget;
+        }
+
         // 3. Interaction Logic (Fist to Stop, Tap/Pinch to Click)
         if (interactionModeRef.current === 'click') {
           prevHandY.current = null;
@@ -706,6 +747,13 @@ export default function App() {
         }
         prevHandY.current = null;
         setPinchProgress(0);
+        // Clear hand hover when hand is lost
+        if (lastHoveredElement.current) {
+          lastHoveredElement.current.classList.remove(HAND_HOVER_CLASS);
+          let ancestor = lastHoveredElement.current.closest('.group') as HTMLElement | null;
+          if (ancestor) ancestor.classList.remove(HAND_HOVER_CLASS);
+          lastHoveredElement.current = null;
+        }
       }
       canvasCtx.restore();
     });
