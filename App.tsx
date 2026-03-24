@@ -1195,7 +1195,7 @@ export default function App() {
                     { title: "Immersive Experiences", desc: "Pushing the boundaries of interaction with AI and 3D. Next-gen digital environments.", icon: Hand },
                     { title: "Brand Strategy", desc: "Defining your voice in a crowded digital landscape. Strategic roadmaps for dominance.", icon: Layers },
                     { title: "Performance Optimization", desc: "Ensuring your digital empire is fast and efficient. Clinical technical precision.", icon: Activity },
-                    { title: "Consulting", desc: "Expert guidance on your digital transformation journey. Strategic engineering advice.", icon: Mic }
+                    { title: "Consulting", desc: "Expert guidance on your digital transformation journey. Strategic engineering advice.", icon: Shield }
                   ].map((s, i) => (
                     <motion.div 
                       key={i}
