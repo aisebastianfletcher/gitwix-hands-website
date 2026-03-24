@@ -866,14 +866,11 @@ export default function App() {
               transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
               className="relative z-10 text-center px-6 max-w-4xl"
             >
-              <div className="mb-12 flex justify-center">
-                <div className="w-24 h-24 rounded-full flex items-center justify-center bg-black relative group overflow-hidden">
-                  <div className="absolute inset-0 bg-cyan-400/20 rounded-full blur-xl group-hover:bg-cyan-400/40 transition-all" />
-                  <img src="/gitwixlogo.png" alt="Gitwix" className="w-full h-full object-contain relative z-10" />
-                </div>
+              <div className="mb-8">
+                <h2 className="text-[16vw] lg:text-[10vw] font-display font-black leading-none tracking-tighter text-white">GITWIX</h2>
               </div>
 
-              <div className="text-white/40 font-mono text-[10px] tracking-[0.6em] uppercase mb-8">Gitwix — Digital Agency</div>
+              <div className="text-white/40 font-mono text-[10px] tracking-[0.6em] uppercase mb-8">Digital Agency</div>
               
               <h1 className="text-[10vw] lg:text-[7vw] font-display font-black leading-none mb-8 tracking-tighter">
                 CRAFTING <br />
