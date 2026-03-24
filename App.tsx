@@ -11,14 +11,22 @@ import { motion, AnimatePresence, useScroll, useSpring } from 'motion/react';
 
 // --- CONSTANTS ---
 const PINCH_THRESHOLD = 0.04;
-const SCROLL_SENSITIVITY = 5;
+const SCROLL_SENSITIVITY = 4;
 const CURSOR_SMOOTHING = 0.1;
 const SCROLL_SMOOTHING = 0.04;
 const TRACKING_LOST_TIMEOUT = 1000;
 const CURSOR_RANGE_SCALE = 1.8;
-const MAGNETIC_RADIUS = 100;
+const MAGNETIC_RADIUS = 140;
+const MAGNETIC_RADIUS_FORM = 200;
 const STAR_COUNT = 1000;
 const HAND_HOVER_CLASS = 'hand-hover';
+const IFRAME_SCROLL_SENSITIVITY = 2.5;
+const IFRAME_SCROLL_DAMPENING = 0.15;
+const CLICK_DEBOUNCE_MS = 450;
+const CURSOR_SMOOTHING_CLICK = 0.35;
+const CURSOR_SMOOTHING_SCROLL = 0.06;
+const CURSOR_DWELL_LOCK_FRAMES = 6;
+const CURSOR_DWELL_LOCK_RADIUS = 20;
 
 type Page = 'home' | 'services' | 'portfolio' | 'about' | 'book';
 
@@ -344,13 +352,18 @@ export default function App() {
   const getMagneticElement = useCallback((x: number, y: number) => {
     const elements = document.querySelectorAll('button, a, input, textarea, [role="button"]');
     let closest: HTMLElement | null = null;
-    let minDistance = MAGNETIC_RADIUS;
+    let minDistance = Infinity;
     elements.forEach((el) => {
       const rect = el.getBoundingClientRect();
+      // Skip elements not visible or off-screen
+      if (rect.width === 0 || rect.height === 0) return;
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
       const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
-      if (distance < minDistance) { minDistance = distance; closest = el as HTMLElement; }
+      // Form inputs and textareas get a much larger magnetic pull
+      const isFormField = el.tagName === 'INPUT' || el.tagName === 'TEXTAREA';
+      const radius = isFormField ? MAGNETIC_RADIUS_FORM : MAGNETIC_RADIUS;
+      if (distance < radius && distance < minDistance) { minDistance = distance; closest = el as HTMLElement; }
     });
     return closest;
   }, []);
@@ -369,6 +382,12 @@ export default function App() {
   const lastHoveredElement = useRef<HTMLElement | null>(null);
   const targetScrollY = useRef<number>(0);
   const currentScrollY = useRef<number>(0);
+  // Dwell-lock: when cursor stays near the same spot, lock onto the magnetic element
+  const dwellCounter = useRef<number>(0);
+  const dwellLockedElement = useRef<HTMLElement | null>(null);
+  const prevSmoothedPos = useRef({ x: 0, y: 0 });
+  // Iframe scroll dampening — accumulates raw delta, sends smoothed
+  const iframeScrollAccum = useRef<number>(0);
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
@@ -393,8 +412,19 @@ export default function App() {
   useEffect(() => {
     let rafId: number;
     const updateScroll = () => {
+      // Smooth main page scrolling
       const diff = targetScrollY.current - currentScrollY.current;
       if (Math.abs(diff) > 0.1) { currentScrollY.current += diff * SCROLL_SMOOTHING; window.scrollTo(0, currentScrollY.current); }
+      // Drain iframe scroll accumulator smoothly between hand-tracking frames
+      if (currentPageRef.current === 'about' && Math.abs(iframeScrollAccum.current) > 0.5 && aboutIframeRef.current?.contentWindow) {
+        const drain = iframeScrollAccum.current * IFRAME_SCROLL_DAMPENING;
+        iframeScrollAccum.current -= drain;
+        if (Math.abs(drain) > 0.5) {
+          aboutIframeRef.current.contentWindow.postMessage({ type: 'gitwix-hand-scroll', delta: drain }, '*');
+        }
+      } else if (Math.abs(iframeScrollAccum.current) <= 0.5) {
+        iframeScrollAccum.current = 0;
+      }
       rafId = requestAnimationFrame(updateScroll);
     };
     rafId = requestAnimationFrame(updateScroll);
@@ -444,22 +474,49 @@ export default function App() {
         const clampedY = Math.max(0, Math.min(1, expandedY));
         const targetX = (1 - clampedX) * window.innerWidth;
         const targetY = clampedY * window.innerHeight;
-        const smoothingFactor = interactionModeRef.current === 'click' ? 0.2 : 0.08;
+        // Heavier smoothing in click mode for stable targeting, lighter in scroll
+        const smoothingFactor = interactionModeRef.current === 'click' ? CURSOR_SMOOTHING_CLICK : CURSOR_SMOOTHING_SCROLL;
         smoothedPos.current.x += (targetX - smoothedPos.current.x) * smoothingFactor;
         smoothedPos.current.y += (targetY - smoothedPos.current.y) * smoothingFactor;
 
+        // Dwell-lock: if cursor barely moves for several frames, lock onto nearest element
+        const moveDist = Math.sqrt(
+          (smoothedPos.current.x - prevSmoothedPos.current.x) ** 2 +
+          (smoothedPos.current.y - prevSmoothedPos.current.y) ** 2
+        );
+        prevSmoothedPos.current = { ...smoothedPos.current };
+
         const magneticElement = getMagneticElement(smoothedPos.current.x, smoothedPos.current.y);
-        if (magneticElement) {
-          const rect = magneticElement.getBoundingClientRect();
+
+        if (interactionModeRef.current === 'click' && magneticElement) {
+          if (moveDist < CURSOR_DWELL_LOCK_RADIUS) {
+            dwellCounter.current++;
+          } else {
+            dwellCounter.current = 0;
+            dwellLockedElement.current = null;
+          }
+          // After dwelling near an element for enough frames, hard-lock cursor onto it
+          if (dwellCounter.current >= CURSOR_DWELL_LOCK_FRAMES) {
+            dwellLockedElement.current = magneticElement;
+          }
+        } else {
+          dwellCounter.current = 0;
+          dwellLockedElement.current = null;
+        }
+
+        // Use dwell-locked element if available, otherwise nearest magnetic element
+        const snapTarget = dwellLockedElement.current || magneticElement;
+        if (snapTarget) {
+          const rect = snapTarget.getBoundingClientRect();
           setCursorPos({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
         } else {
           setCursorPos({ x: smoothedPos.current.x, y: smoothedPos.current.y });
         }
 
         // Hand hover simulation
-        const hx = magneticElement ? (magneticElement.getBoundingClientRect().left + magneticElement.getBoundingClientRect().width / 2) : smoothedPos.current.x;
-        const hy = magneticElement ? (magneticElement.getBoundingClientRect().top + magneticElement.getBoundingClientRect().height / 2) : smoothedPos.current.y;
-        const hoveredEl = (magneticElement || document.elementFromPoint(hx, hy)) as HTMLElement | null;
+        const hx = snapTarget ? (snapTarget.getBoundingClientRect().left + snapTarget.getBoundingClientRect().width / 2) : smoothedPos.current.x;
+        const hy = snapTarget ? (snapTarget.getBoundingClientRect().top + snapTarget.getBoundingClientRect().height / 2) : smoothedPos.current.y;
+        const hoveredEl = (snapTarget || document.elementFromPoint(hx, hy)) as HTMLElement | null;
         const findHoverTarget = (el: HTMLElement | null): HTMLElement | null => {
           let current = el;
           while (current && current !== document.body) {
@@ -494,7 +551,7 @@ export default function App() {
           setPinchProgress(Math.max(0, 1 - (dist / 0.09)));
           if (isPinchingGesture && !wasTapping.current) {
             const now = Date.now();
-            if (now - lastClickTime.current > 800) {
+            if (now - lastClickTime.current > CLICK_DEBOUNCE_MS) {
               // Check if clicking a nav element first (nav must remain functional on about page)
               const navElement = getMagneticElement(smoothedPos.current.x, smoothedPos.current.y);
               const isNavClick = navElement && navElement.closest('nav');
@@ -521,14 +578,22 @@ export default function App() {
           wasTapping.current = isPinchingGesture;
         } else if (interactionModeRef.current === 'scroll') {
           wasTapping.current = false; setPinchProgress(0);
+          dwellCounter.current = 0; dwellLockedElement.current = null;
           const currentY = landmarks[9].y;
           if (prevHandY.current !== null) {
-            const deltaY = (prevHandY.current - currentY) * window.innerHeight * SCROLL_SENSITIVITY;
-            if (Math.abs(deltaY) > 2) {
-              // When on About page, forward scroll to the immersive iframe
-              if (currentPageRef.current === 'about' && aboutIframeRef.current?.contentWindow) {
-                aboutIframeRef.current.contentWindow.postMessage({ type: 'gitwix-hand-scroll', delta: deltaY }, '*');
-              } else {
+            // When on About page, use reduced sensitivity and dampened scrolling
+            if (currentPageRef.current === 'about' && aboutIframeRef.current?.contentWindow) {
+              const rawDelta = (prevHandY.current - currentY) * window.innerHeight * IFRAME_SCROLL_SENSITIVITY;
+              // Accumulate and dampen — sends a smoothed portion each frame
+              iframeScrollAccum.current += rawDelta;
+              const smoothedDelta = iframeScrollAccum.current * IFRAME_SCROLL_DAMPENING;
+              iframeScrollAccum.current -= smoothedDelta;
+              if (Math.abs(smoothedDelta) > 0.5) {
+                aboutIframeRef.current.contentWindow.postMessage({ type: 'gitwix-hand-scroll', delta: smoothedDelta }, '*');
+              }
+            } else {
+              const deltaY = (prevHandY.current - currentY) * window.innerHeight * SCROLL_SENSITIVITY;
+              if (Math.abs(deltaY) > 2) {
                 targetScrollY.current = Math.max(0, Math.min(document.documentElement.scrollHeight - window.innerHeight, targetScrollY.current + deltaY));
               }
             }
@@ -565,6 +630,8 @@ export default function App() {
   useEffect(() => {
     currentPageRef.current = currentPage;
     targetScrollY.current = 0; currentScrollY.current = 0; window.scrollTo(0, 0);
+    iframeScrollAccum.current = 0;
+    dwellCounter.current = 0; dwellLockedElement.current = null;
   }, [currentPage]);
 
   useEffect(() => {
