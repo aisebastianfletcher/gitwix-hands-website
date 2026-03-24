@@ -358,6 +358,7 @@ export default function App() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const aboutIframeRef = useRef<HTMLIFrameElement>(null);
   const prevHandY = useRef<number | null>(null);
   const lastClickTime = useRef<number>(0);
   const smoothedPos = useRef({ x: 0, y: 0 });
@@ -487,14 +488,21 @@ export default function App() {
           if (isPinchingGesture && !wasTapping.current) {
             const now = Date.now();
             if (now - lastClickTime.current > 800) {
-              const me = getMagneticElement(smoothedPos.current.x, smoothedPos.current.y);
-              const element = me || document.elementFromPoint(smoothedPos.current.x, smoothedPos.current.y);
-              if (element instanceof HTMLElement) {
-                const rect = element.getBoundingClientRect();
-                setClickFeedback({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+              // When on About page, forward click to the immersive iframe
+              if (aboutIframeRef.current?.contentWindow) {
+                setClickFeedback({ x: smoothedPos.current.x, y: smoothedPos.current.y });
                 setTimeout(() => setClickFeedback(null), 400);
-                element.click();
-                if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') element.focus();
+                aboutIframeRef.current.contentWindow.postMessage({ type: 'gitwix-hand-click', x: smoothedPos.current.x, y: smoothedPos.current.y }, '*');
+              } else {
+                const me = getMagneticElement(smoothedPos.current.x, smoothedPos.current.y);
+                const element = me || document.elementFromPoint(smoothedPos.current.x, smoothedPos.current.y);
+                if (element instanceof HTMLElement) {
+                  const rect = element.getBoundingClientRect();
+                  setClickFeedback({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+                  setTimeout(() => setClickFeedback(null), 400);
+                  element.click();
+                  if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') element.focus();
+                }
               }
               lastClickTime.current = now;
             }
@@ -506,7 +514,12 @@ export default function App() {
           if (prevHandY.current !== null) {
             const deltaY = (prevHandY.current - currentY) * window.innerHeight * SCROLL_SENSITIVITY;
             if (Math.abs(deltaY) > 2) {
-              targetScrollY.current = Math.max(0, Math.min(document.documentElement.scrollHeight - window.innerHeight, targetScrollY.current + deltaY));
+              // When on About page, forward scroll to the immersive iframe
+              if (aboutIframeRef.current?.contentWindow) {
+                aboutIframeRef.current.contentWindow.postMessage({ type: 'gitwix-hand-scroll', delta: deltaY }, '*');
+              } else {
+                targetScrollY.current = Math.max(0, Math.min(document.documentElement.scrollHeight - window.innerHeight, targetScrollY.current + deltaY));
+              }
             }
           }
           prevHandY.current = currentY;
@@ -963,6 +976,7 @@ export default function App() {
           {currentPage === 'about' && (
             <motion.div key="about" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full" style={{ height: 'calc(100vh - 0px)' }}>
               <iframe
+                ref={aboutIframeRef}
                 src="https://aisebastianfletcher.github.io/GITWIX-immersive/"
                 title="GITWIX Immersive Experience"
                 className="w-full h-full border-0"
@@ -970,6 +984,14 @@ export default function App() {
                 allow="autoplay; fullscreen; encrypted-media"
                 allowFullScreen
               />
+              {/* Back button overlay — sits above the iframe so user can navigate away */}
+              <button
+                onClick={() => setCurrentPage('home')}
+                style={{ position: 'fixed', top: '2.5vh', left: '3vw', zIndex: 40 }}
+                className="px-5 py-2 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-[10px] uppercase tracking-[0.3em] font-black text-white/70 hover:text-white hover:bg-black/80 transition-all"
+              >
+                ← Back
+              </button>
             </motion.div>
           )}
 
