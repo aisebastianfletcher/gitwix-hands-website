@@ -359,6 +359,7 @@ export default function App() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const aboutIframeRef = useRef<HTMLIFrameElement>(null);
+  const currentPageRef = useRef<Page>('home');
   const prevHandY = useRef<number | null>(null);
   const lastClickTime = useRef<number>(0);
   const smoothedPos = useRef({ x: 0, y: 0 });
@@ -371,6 +372,12 @@ export default function App() {
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+
+  const handleAboutIframeLoad = useCallback(() => {
+    if (mode === 'hand' && aboutIframeRef.current?.contentWindow) {
+      aboutIframeRef.current.contentWindow.postMessage({ type: 'gitwix-hand-enter' }, '*');
+    }
+  }, [mode]);
 
   const isFingerExtended = (landmarks: any, tipIdx: number, knuckleIdx: number) => {
     const wrist = landmarks[0]; const tip = landmarks[tipIdx]; const knuckle = landmarks[knuckleIdx];
@@ -488,8 +495,12 @@ export default function App() {
           if (isPinchingGesture && !wasTapping.current) {
             const now = Date.now();
             if (now - lastClickTime.current > 800) {
-              // When on About page, forward click to the immersive iframe
-              if (aboutIframeRef.current?.contentWindow) {
+              // Check if clicking a nav element first (nav must remain functional on about page)
+              const navElement = getMagneticElement(smoothedPos.current.x, smoothedPos.current.y);
+              const isNavClick = navElement && navElement.closest('nav');
+
+              if (currentPageRef.current === 'about' && aboutIframeRef.current?.contentWindow && !isNavClick) {
+                // Forward click to the immersive iframe
                 setClickFeedback({ x: smoothedPos.current.x, y: smoothedPos.current.y });
                 setTimeout(() => setClickFeedback(null), 400);
                 aboutIframeRef.current.contentWindow.postMessage({ type: 'gitwix-hand-click', x: smoothedPos.current.x, y: smoothedPos.current.y }, '*');
@@ -515,7 +526,7 @@ export default function App() {
             const deltaY = (prevHandY.current - currentY) * window.innerHeight * SCROLL_SENSITIVITY;
             if (Math.abs(deltaY) > 2) {
               // When on About page, forward scroll to the immersive iframe
-              if (aboutIframeRef.current?.contentWindow) {
+              if (currentPageRef.current === 'about' && aboutIframeRef.current?.contentWindow) {
                 aboutIframeRef.current.contentWindow.postMessage({ type: 'gitwix-hand-scroll', delta: deltaY }, '*');
               } else {
                 targetScrollY.current = Math.max(0, Math.min(document.documentElement.scrollHeight - window.innerHeight, targetScrollY.current + deltaY));
@@ -552,8 +563,18 @@ export default function App() {
   }, [mode]);
 
   useEffect(() => {
+    currentPageRef.current = currentPage;
     targetScrollY.current = 0; currentScrollY.current = 0; window.scrollTo(0, 0);
   }, [currentPage]);
+
+  useEffect(() => {
+    if (currentPage === 'about' && mode === 'hand' && aboutIframeRef.current?.contentWindow) {
+      const timer = setTimeout(() => {
+        aboutIframeRef.current?.contentWindow?.postMessage({ type: 'gitwix-hand-enter' }, '*');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentPage, mode]);
 
   // ============================
   // RENDER
@@ -983,6 +1004,7 @@ export default function App() {
                 style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 30 }}
                 allow="autoplay; fullscreen; encrypted-media"
                 allowFullScreen
+                onLoad={handleAboutIframeLoad}
               />
               {/* Back button overlay — sits above the iframe so user can navigate away */}
               <button
