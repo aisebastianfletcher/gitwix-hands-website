@@ -6,7 +6,7 @@ import { Environment, Stars } from '@react-three/drei';
 import { Hands, Results, HAND_CONNECTIONS } from '@mediapipe/hands';
 import { Camera } from '@mediapipe/camera_utils';
 import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
-import { Loader2, Hand, Sparkles, Globe, Layers, Mail, Activity, Zap, Shield, ArrowRight, ChevronRight, ExternalLink, Check, Star, Clock, Code, Palette, Search, Wrench, ShoppingCart, Smartphone, CalendarDays, MapPin, Phone, Quote, Users, TrendingUp, Award, Eye } from 'lucide-react';
+import { Loader2, Hand, Sparkles, Globe, Layers, Mail, Activity, Zap, Shield, ArrowRight, ChevronRight, ExternalLink, Check, Star, Clock, Code, Palette, Search, Wrench, ShoppingCart, Smartphone, CalendarDays, Phone } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useSpring } from 'motion/react';
 
 // --- CONSTANTS ---
@@ -271,14 +271,7 @@ const PORTFOLIO = [
   },
 ];
 
-// --- ABOUT STORY DATA (from GITWIX-immersive) ---
-const ABOUT_STORY = [
-  { title: "Founded in 2023", subtitle: "One Developer, Big Ambition", left: "Gitwix began in 2023 with a simple idea: stop shipping websites that just look good and start shipping ones that actually move numbers — leads, sales, and sign-ups.", right: "It started with a single developer obsessed with clean code, fast load times, and the feeling of hitting 'deploy' on something that genuinely changes how a business operates." },
-  { title: "From Freelance to Digital Engine", subtitle: "Beyond Pretty Websites", left: "What began as small freelance builds quickly evolved into creating full digital engines: sites, automations, and dashboards that all talk to each other and quietly work in the background.", right: "The first decision was clear: no template-driven, fragile sites. Every project would be a tailored system designed to be fast, secure, and brutally effective at converting visitors into customers." },
-  { title: "Performance as Non-Negotiable", subtitle: "Progressive Web Apps as Default", left: "Gitwix leaned into modern frameworks and performance-first architecture, treating Core Web Vitals not as a report to glance at, but as a scoreboard to beat with every launch.", right: "Instead of stopping at 'responsive', Gitwix pushed Progressive Web Apps — installable, offline-ready experiences that feel like native apps and keep users engaged without friction." },
-  { title: "AI Enters the Stack", subtitle: "Partnerships with Builders", left: "As AI tools matured, Gitwix started weaving in AI agents for tasks like triaging enquiries, summarising analytics, and maintaining content, so sites could adapt without constant human babysitting.", right: "Gitwix collaborated with platforms and projects like OpenClaw to integrate real developer-grade AI agents directly into clients' workflows, turning websites into living products." },
-  { title: "What Gitwix Stands For Now", subtitle: "Smaller Team, Sharper Focus", left: "Rather than scaling into layers of account managers and hand-offs, Gitwix stayed intentionally lean, keeping builders close to clients and prioritising depth of impact over volume of projects.", right: "Founded in 2023, Gitwix now stands for one thing: building digital experiences that feel effortless to use, ruthless about performance, and powerful enough to become a core part of how a business runs every day." },
-];
+
 
 // ============================
 // MAIN APP
@@ -966,67 +959,17 @@ export default function App() {
             </motion.div>
           )}
 
-          {/* ==================== ABOUT ==================== */}
+          {/* ==================== ABOUT (GITWIX IMMERSIVE) ==================== */}
           {currentPage === 'about' && (
-            <motion.div key="about" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full min-h-screen pt-36 lg:pt-48 px-6 lg:px-24 pb-32">
-              <div className="max-w-6xl mx-auto">
-                <div className="mb-24">
-                  <span className="text-[10px] font-mono tracking-[0.4em] text-white/40 uppercase mb-8 block">Our Story</span>
-                  <ExplodingText text="ABOUT GITWIX" className="text-5xl lg:text-8xl font-display font-black mb-6 tracking-tighter" />
-                  <p className="text-lg text-white/40 font-light max-w-2xl leading-relaxed">
-                    Building digital experiences that feel effortless to use, ruthless about performance, and powerful enough to become a core part of how a business runs.
-                  </p>
-                </div>
-
-                <div className="space-y-0">
-                  {ABOUT_STORY.map((scene, i) => (
-                    <motion.div key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 1 }} viewport={{ once: true }} className="py-16 lg:py-24 border-b border-white/5">
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
-                        <div>
-                          <span className="text-[10px] font-mono tracking-[0.4em] text-cyan-400/60 uppercase mb-6 block">0{i + 1}</span>
-                          <h3 className="text-3xl lg:text-4xl font-display font-bold mb-6 leading-tight">{scene.title}</h3>
-                          <p className="text-white/50 font-light leading-relaxed text-lg">{scene.left}</p>
-                        </div>
-                        <div className="flex flex-col justify-end">
-                          <h4 className="text-xl font-bold mb-4 text-white/70">{scene.subtitle}</h4>
-                          <p className="text-white/40 font-light leading-relaxed">{scene.right}</p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-
-                {/* Immersive Experience Link */}
-                <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mt-24 p-12 lg:p-16 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-sm text-center">
-                  <Eye className="w-8 h-8 text-cyan-400 mx-auto mb-6" />
-                  <h3 className="text-3xl font-display font-bold mb-4">Experience the Full Story</h3>
-                  <p className="text-white/40 mb-8 font-light max-w-lg mx-auto leading-relaxed">
-                    Dive into the GITWIX Immersive Experience — a cinematic, scroll-driven journey through our history with video, audio, and motion.
-                  </p>
-                  <a href="https://aisebastianfletcher.github.io/GITWIX-immersive/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 px-10 py-4 bg-white text-black rounded-full text-[10px] uppercase tracking-[0.3em] font-black hover:bg-cyan-400 transition-colors">
-                    <ExternalLink className="w-4 h-4" /> Launch Immersive Experience
-                  </a>
-                </motion.div>
-
-                {/* Company Info */}
-                <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="p-8 border border-white/5 rounded-2xl">
-                    <MapPin className="w-5 h-5 text-cyan-400 mb-4" />
-                    <h4 className="font-bold mb-2">Based in Manchester</h4>
-                    <p className="text-white/40 text-sm font-light">9 Owen Street, Deansgate<br />Manchester, M15 4UA</p>
-                  </div>
-                  <div className="p-8 border border-white/5 rounded-2xl">
-                    <Users className="w-5 h-5 text-cyan-400 mb-4" />
-                    <h4 className="font-bold mb-2">Lean by Design</h4>
-                    <p className="text-white/40 text-sm font-light">Intentionally small team. Builders close to clients. Depth over volume.</p>
-                  </div>
-                  <div className="p-8 border border-white/5 rounded-2xl">
-                    <TrendingUp className="w-5 h-5 text-cyan-400 mb-4" />
-                    <h4 className="font-bold mb-2">Results-Driven</h4>
-                    <p className="text-white/40 text-sm font-light">Every project measured by leads, sales, and sign-ups — not just aesthetics.</p>
-                  </div>
-                </div>
-              </div>
+            <motion.div key="about" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full" style={{ height: 'calc(100vh - 0px)' }}>
+              <iframe
+                src="https://aisebastianfletcher.github.io/GITWIX-immersive/"
+                title="GITWIX Immersive Experience"
+                className="w-full h-full border-0"
+                style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 30 }}
+                allow="autoplay; fullscreen; encrypted-media"
+                allowFullScreen
+              />
             </motion.div>
           )}
 
