@@ -618,9 +618,9 @@ function HomePageContent({ setCurrentPage, setSelectedService }: { setCurrentPag
 
       {/* ===== SECTION 2: Stats Counter ===== */}
       <section ref={statsRef} className="relative">
-        <div className="flex flex-col lg:flex-row min-h-[200vh]">
+        <div className="flex flex-col lg:flex-row min-h-[150vh]">
           {/* Left: Sticky */}
-          <div className="lg:w-2/5 lg:h-screen lg:sticky lg:top-0 flex flex-col justify-center px-8 lg:px-24 py-24">
+          <div className="lg:w-2/5 lg:h-screen lg:sticky lg:top-0 flex flex-col justify-center px-8 lg:px-24 py-16">
             <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase mb-6 block">01 — Track Record</span>
             <h2 className="text-6xl lg:text-8xl font-display font-black tracking-tighter leading-[0.85] mb-8">
               Results that<br />
@@ -636,7 +636,7 @@ function HomePageContent({ setCurrentPage, setSelectedService }: { setCurrentPag
           </div>
 
           {/* Right: Scrolling stat cards with parallax */}
-          <div className="lg:w-3/5 px-8 lg:px-24 py-24 lg:py-48 relative z-10">
+          <div className="lg:w-3/5 px-8 lg:px-24 py-16 lg:py-32 relative z-10">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               {STATS.map((s, i) => (
                 <motion.div
@@ -657,7 +657,7 @@ function HomePageContent({ setCurrentPage, setSelectedService }: { setCurrentPag
 
             {/* Expanding rule */}
             <motion.div
-              className="h-[1px] bg-white/10 mt-24 mb-24 origin-left"
+              className="h-[1px] bg-white/10 mt-16 mb-16 origin-left"
               initial={{ scaleX: 0 }}
               whileInView={{ scaleX: 1 }}
               transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
@@ -723,7 +723,7 @@ function HomePageContent({ setCurrentPage, setSelectedService }: { setCurrentPag
 
       {/* ===== SECTION 4: Products ===== */}
       <section ref={productsRef} className="relative">
-        <div className="flex flex-col lg:flex-row min-h-[300vh]">
+        <div className="flex flex-col lg:flex-row min-h-[250vh]">
           {/* Left: Sticky with progress dots */}
           <div className="lg:w-2/5 lg:h-screen lg:sticky lg:top-0 flex flex-col justify-center px-8 lg:px-24 py-24">
             <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase mb-6 block">03 — What We Build</span>
@@ -752,7 +752,7 @@ function HomePageContent({ setCurrentPage, setSelectedService }: { setCurrentPag
           </div>
 
           {/* Right: Product cards with reveal animations */}
-          <div className="lg:w-3/5 px-8 lg:px-24 py-24 lg:py-48 space-y-16">
+          <div className="lg:w-3/5 px-8 lg:px-24 py-16 lg:py-32 space-y-12">
             {SERVICES.map((s, i) => (
               <motion.div
                 key={i}
@@ -788,7 +788,7 @@ function HomePageContent({ setCurrentPage, setSelectedService }: { setCurrentPag
       </section>
 
       {/* ===== SECTION 5: Stacked Testimonials ===== */}
-      <section ref={testimonialsRef} style={{ height: `${TESTIMONIALS.length * 60}vh` }} className="relative">
+      <section ref={testimonialsRef} style={{ height: `${TESTIMONIALS.length * 50}vh` }} className="relative">
         <div className="sticky top-0 h-screen flex flex-col items-center justify-center px-6 lg:px-24">
           {/* Section label */}
           <div className="absolute top-24 left-8 lg:left-24">
@@ -880,22 +880,27 @@ function TestimonialCard({
   start: number;
   end: number;
 }) {
-  const overlap = 0.05;
-  const fadeIn = Math.max(0, start - overlap);
-  const fadeInEnd = Math.min(1, start + 0.03);
-  const fadeOutStart = Math.max(0, end - 0.03);
-  const fadeOut = Math.min(1, end + overlap);
+  const segment = end - start;
+  const fadeIn = start;
+  const fadeInEnd = Math.min(1, start + segment * 0.15);
+  const fadeOutStart = Math.max(0, end - segment * 0.15);
+  const fadeOut = end;
   const opacity = useTransform(
     scrollProgress,
     [fadeIn, fadeInEnd, fadeOutStart, fadeOut],
     [0, 1, 1, 0],
     { clamp: true }
   );
-  const y = useTransform(scrollProgress, [fadeIn, fadeOut], [60, -60]);
+  const y = useTransform(
+    scrollProgress,
+    [fadeIn, fadeInEnd, fadeOutStart, fadeOut],
+    [40, 0, 0, -40],
+    { clamp: true }
+  );
   const scale = useTransform(
     scrollProgress,
     [fadeIn, fadeInEnd, fadeOutStart, fadeOut],
-    [0.92, 1, 1, 0.92],
+    [0.95, 1, 1, 0.95],
     { clamp: true }
   );
 
@@ -1290,7 +1295,7 @@ export default function App() {
   return (
     <div className="relative w-full min-h-screen bg-black text-white selection:bg-white/30 overflow-x-hidden font-sans">
       {/* Three.js Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
+      <div className="fixed inset-0 z-[1] pointer-events-none">
         <Canvas><Suspense fallback={null}><Scene scrollProgress={scrollYProgress} cursorPos={cursorPos} currentPage={currentPage} /></Suspense></Canvas>
       </div>
 
@@ -1458,7 +1463,7 @@ export default function App() {
       </nav>
 
       {/* ===== MAIN CONTENT ===== */}
-      <main className={`relative z-10 transition-opacity duration-1000 ${mode === 'intro' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      <main className={`relative z-[2] transition-opacity duration-1000 ${mode === 'intro' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <AnimatePresence mode="wait">
 
           {/* ==================== HOME ==================== */}
@@ -1794,7 +1799,7 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 py-16 border-t border-white/5">
+      <footer className="relative z-[2] py-16 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6 lg:px-24">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             <div className="flex items-center gap-8">
