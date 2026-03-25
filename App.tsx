@@ -1237,7 +1237,7 @@ export default function App() {
   return (
     <div className="relative w-full min-h-screen bg-black text-white selection:bg-white/30 overflow-x-hidden font-sans">
       {/* Three.js Background */}
-      <div className="fixed inset-0 z-[0] pointer-events-none opacity-30">
+      <div className="fixed inset-0 z-[0] pointer-events-none" style={{ opacity: 0.2 }}>
         <Canvas><Suspense fallback={null}><Scene scrollProgress={scrollYProgress} cursorPos={cursorPos} currentPage={currentPage} /></Suspense></Canvas>
       </div>
 
