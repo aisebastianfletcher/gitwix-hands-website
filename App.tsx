@@ -6,7 +6,7 @@ import { Environment, Stars } from '@react-three/drei';
 import { Hands, Results, HAND_CONNECTIONS } from '@mediapipe/hands';
 import { Camera } from '@mediapipe/camera_utils';
 import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
-import { Loader2, Hand, Sparkles, Globe, Layers, Mail, Activity, Zap, Shield, ArrowRight, ChevronRight, ExternalLink, Check, Star, Clock, Code, Palette, Search, Wrench, ShoppingCart, Smartphone, CalendarDays, Phone } from 'lucide-react';
+import { Loader2, Hand, Sparkles, Globe, Layers, Mail, Activity, Zap, Shield, ArrowRight, ArrowLeft, ChevronRight, ExternalLink, Check, Star, Clock, Code, Palette, Search, Wrench, ShoppingCart, Smartphone, CalendarDays, Phone } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useSpring } from 'motion/react';
 
 // --- CONSTANTS ---
@@ -251,12 +251,166 @@ const TESTIMONIALS = [
 
 // --- SERVICES DATA ---
 const SERVICES = [
-  { title: "Custom Websites", desc: "Bespoke, responsive websites tailored to your business. Mobile-first, SEO-optimised, and built to convert visitors into customers.", price: "From £200", icon: Code, features: ["Responsive Design", "SEO Built-In", "Fast Loading", "CMS Integration"] },
-  { title: "E-commerce Stores", desc: "Professional online stores with secure payments, inventory management, and analytics. Shopify, WooCommerce, or fully custom.", price: "From £500", icon: ShoppingCart, features: ["Payment Integration", "Inventory Management", "Order Tracking", "Customer Dashboard"] },
-  { title: "Progressive Web Apps", desc: "High-performance web apps that work offline, install on devices, and achieve 100/100 Lighthouse scores.", price: "From £799", icon: Smartphone, features: ["Offline Functionality", "Push Notifications", "App-Like Experience", "100/100 Lighthouse"] },
-  { title: "Bespoke Web Applications", desc: "Complex, tailored web applications and dashboards engineered for your specific workflows and business logic.", price: "From £1,200", icon: Layers, features: ["Custom Architecture", "API Integration", "Real-Time Data", "Scalable Infrastructure"] },
-  { title: "Web Design & Branding", desc: "Create a strong visual identity with custom design that reflects your brand and resonates with your audience.", price: "Custom", icon: Palette, features: ["Logo Design", "Brand Guidelines", "UI/UX Design", "Visual Identity"] },
-  { title: "Maintenance & Support", desc: "Ongoing maintenance, security updates, performance monitoring, and technical support to keep your site running.", price: "From £50/mo", icon: Wrench, features: ["Security Updates", "Performance Monitoring", "Bug Fixes", "Priority Support"] },
+  {
+    title: "Custom Websites",
+    desc: "Bespoke, responsive websites tailored to your business. Mobile-first, SEO-optimised, and built to convert visitors into customers.",
+    price: "From £200",
+    monthly: "£50/mo",
+    buildTime: "1-2 weeks",
+    icon: Code,
+    features: ["Responsive Design", "SEO Built-In", "Fast Loading", "CMS Integration"],
+    included: [
+      "Custom design from scratch",
+      "Mobile-first responsive layout",
+      "On-page SEO & meta tags",
+      "Contact form integration",
+      "Analytics setup (GA4)",
+      "SSL certificate & hosting setup",
+      "2 rounds of revisions",
+      "30-day post-launch support"
+    ],
+    monthlyIncludes: [
+      "Managed hosting & CDN",
+      "Security monitoring & SSL renewal",
+      "Monthly performance reports",
+      "Content updates (up to 2hrs/mo)",
+      "Bug fixes & technical support",
+      "Uptime monitoring"
+    ]
+  },
+  {
+    title: "E-commerce Stores",
+    desc: "Professional online stores with secure payments, inventory management, and analytics. Shopify, WooCommerce, or fully custom.",
+    price: "From £500",
+    monthly: "£100/mo",
+    buildTime: "2-3 weeks",
+    icon: ShoppingCart,
+    features: ["Payment Integration", "Inventory Management", "Order Tracking", "Customer Dashboard"],
+    included: [
+      "Custom storefront design",
+      "Stripe / PayPal integration",
+      "Product catalog & categories",
+      "Inventory management system",
+      "Order tracking & notifications",
+      "Customer accounts & dashboard",
+      "Checkout flow optimisation",
+      "3 rounds of revisions"
+    ],
+    monthlyIncludes: [
+      "Managed hosting & CDN",
+      "Payment gateway monitoring",
+      "Security patches & updates",
+      "Product upload support (up to 3hrs/mo)",
+      "Performance optimisation",
+      "Priority bug fixes"
+    ]
+  },
+  {
+    title: "Progressive Web Apps",
+    desc: "High-performance web apps that work offline, install on devices, and achieve 100/100 Lighthouse scores.",
+    price: "From £799",
+    monthly: "£150/mo",
+    buildTime: "2-4 weeks",
+    icon: Smartphone,
+    features: ["Offline Functionality", "Push Notifications", "App-Like Experience", "100/100 Lighthouse"],
+    included: [
+      "Service worker & offline support",
+      "Push notification system",
+      "App manifest & installability",
+      "100/100 Lighthouse target",
+      "Responsive across all devices",
+      "API integration",
+      "Progressive enhancement",
+      "Performance audit & optimisation"
+    ],
+    monthlyIncludes: [
+      "Managed hosting & scaling",
+      "Push notification management",
+      "Service worker updates",
+      "Performance monitoring",
+      "API uptime monitoring",
+      "Priority support & bug fixes"
+    ]
+  },
+  {
+    title: "Bespoke Web Applications",
+    desc: "Complex, tailored web applications and dashboards engineered for your specific workflows and business logic.",
+    price: "From £1,200",
+    monthly: "£200/mo",
+    buildTime: "4-8 weeks",
+    icon: Layers,
+    features: ["Custom Architecture", "API Integration", "Real-Time Data", "Scalable Infrastructure"],
+    included: [
+      "Custom architecture design",
+      "Database design & setup",
+      "API development & integration",
+      "User authentication & roles",
+      "Admin dashboard",
+      "Real-time data capabilities",
+      "Automated testing",
+      "Deployment pipeline setup"
+    ],
+    monthlyIncludes: [
+      "Cloud infrastructure management",
+      "Database backups & monitoring",
+      "API uptime & error tracking",
+      "Security audits & patches",
+      "Scaling support",
+      "Dedicated support channel"
+    ]
+  },
+  {
+    title: "AI Workflow Automation",
+    desc: "Automate repetitive tasks with AI-powered workflows. Email sequences, lead routing, booking flows, and more.",
+    price: "From £500",
+    monthly: "£100/mo",
+    buildTime: "1-3 weeks",
+    icon: Zap,
+    features: ["AI Integration", "Process Automation", "Email Sequences", "Lead Routing"],
+    included: [
+      "Workflow audit & design",
+      "AI agent setup & training",
+      "Email sequence automation",
+      "Lead routing & scoring",
+      "CRM integration",
+      "Booking flow automation",
+      "Status update automation",
+      "Testing & documentation"
+    ],
+    monthlyIncludes: [
+      "AI model monitoring",
+      "Workflow optimisation",
+      "Error handling & alerts",
+      "Usage analytics",
+      "Ongoing AI training",
+      "Priority support"
+    ]
+  },
+  {
+    title: "Maintenance & Support",
+    desc: "Ongoing maintenance, security updates, performance monitoring, and technical support to keep your site running.",
+    price: "Custom",
+    monthly: "From £50/mo",
+    buildTime: "Ongoing",
+    icon: Wrench,
+    features: ["Security Updates", "Performance Monitoring", "Bug Fixes", "Priority Support"],
+    included: [
+      "Initial site audit",
+      "Performance baseline report",
+      "Security hardening",
+      "Monitoring setup",
+      "Documentation review",
+      "Priority support channel setup"
+    ],
+    monthlyIncludes: [
+      "Security updates & patches",
+      "Performance monitoring & reports",
+      "Bug fixes & troubleshooting",
+      "Content updates (hours vary by plan)",
+      "Uptime monitoring & alerts",
+      "Monthly check-in call"
+    ]
+  },
 ];
 
 // --- PORTFOLIO DATA ---
@@ -290,6 +444,7 @@ export default function App() {
   const [subscribeEmail, setSubscribeEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [selectedService, setSelectedService] = useState<number | null>(null);
   const [interactionMode, setInteractionMode] = useState<'scroll' | 'click'>('scroll');
   const [isLoading, setIsLoading] = useState(true);
   const [isCalibrating, setIsCalibrating] = useState(false);
@@ -632,6 +787,7 @@ export default function App() {
     targetScrollY.current = 0; currentScrollY.current = 0; window.scrollTo(0, 0);
     iframeScrollAccum.current = 0;
     dwellCounter.current = 0; dwellLockedElement.current = null;
+    if (currentPage !== 'services') setSelectedService(null);
   }, [currentPage]);
 
   useEffect(() => {
@@ -664,7 +820,8 @@ export default function App() {
               <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,#00ffff_0%,transparent_50%)]" />
             </div>
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} className="relative z-10 text-center px-6 max-w-4xl">
-              <div className="mb-8">
+              <div className="mb-8 flex flex-col items-center gap-6">
+                <img src="/gitwixlogo.jpg" alt="Gitwix" className="w-24 h-24 lg:w-32 lg:h-32 object-contain" />
                 <h2 className="text-[16vw] lg:text-[10vw] font-display font-black leading-none tracking-tighter text-white">GITWIX</h2>
               </div>
               <div className="text-white/40 font-mono text-[10px] tracking-[0.6em] uppercase mb-8">Web Developer &bull; Manchester, Deansgate</div>
@@ -801,7 +958,8 @@ export default function App() {
 
       {/* Navigation */}
       <nav className={`fixed top-0 left-0 right-0 z-40 px-6 lg:px-12 py-6 lg:py-10 flex items-center justify-between transition-all duration-1000 ${mode === 'intro' ? 'opacity-0 -translate-y-10' : 'opacity-100 translate-y-0'}`}>
-        <div className="text-2xl font-serif italic tracking-tighter cursor-pointer flex items-center gap-4 group" onClick={() => setCurrentPage('home')}>
+        <div className="cursor-pointer flex items-center gap-3 group" onClick={() => setCurrentPage('home')}>
+          <img src="/gitwixlogo.jpg" alt="Gitwix" className="w-8 h-8 object-contain" />
           <span className="tracking-[0.2em] font-sans font-black text-sm">GITWIX</span>
         </div>
         <div className="flex items-center space-x-6 lg:space-x-12">
@@ -821,10 +979,13 @@ export default function App() {
           {/* ==================== HOME ==================== */}
           {currentPage === 'home' && (
             <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full">
-              <div className="flex flex-col lg:flex-row min-h-screen">
-                {/* Left: Sticky Hero */}
+
+              {/* ===== CHAPTER 1: Hero ===== */}
+              <div className="flex flex-col lg:flex-row min-h-[200vh]">
+                {/* Left: Sticky hero with logo */}
                 <div className="lg:w-1/2 lg:h-screen lg:sticky lg:top-0 flex flex-col justify-center px-8 lg:px-24 py-24">
-                  <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}>
+                  <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2 }}>
+                    <img src="/gitwixlogo.jpg" alt="" className="w-16 h-16 mb-8 opacity-80" />
                     <span className="text-cyan-400 font-mono text-[10px] tracking-[0.5em] uppercase mb-8 block">Web Developer in Manchester</span>
                     <div className="mb-12">
                       <ExplodingText text="BESPOKE" className="text-[10vw] lg:text-[5.5vw] font-display font-black leading-[0.85] tracking-tighter" />
@@ -849,9 +1010,9 @@ export default function App() {
                   </motion.div>
                 </div>
 
-                {/* Right: Scrolling Content */}
-                <div className="lg:w-1/2 px-8 lg:px-24 py-24 space-y-48">
-                  {/* Stats */}
+                {/* Right: Scrolling stats + USPs */}
+                <div className="lg:w-1/2 px-8 lg:px-24 py-24 lg:py-48 space-y-48">
+                  {/* Stats section */}
                   <section>
                     <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase mb-12 block">01 — Track Record</span>
                     <div className="grid grid-cols-2 gap-8">
@@ -892,44 +1053,172 @@ export default function App() {
                       ))}
                     </div>
                   </section>
-
-                  {/* Testimonials */}
-                  <section>
-                    <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase mb-12 block">03 — Client Stories</span>
-                    <div className="space-y-8">
-                      {TESTIMONIALS.slice(0, 4).map((t, i) => (
-                        <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }} className="p-8 glass-panel rounded-2xl border border-white/5">
-                          <div className="flex gap-1 mb-4">{[...Array(5)].map((_, j) => <Star key={j} className="w-3 h-3 fill-cyan-400 text-cyan-400" />)}</div>
-                          <p className="text-white/60 font-light italic leading-relaxed mb-6">"{t.text}"</p>
-                          <div>
-                            <p className="text-xs font-bold uppercase tracking-widest">{t.name}</p>
-                            <p className="text-[10px] text-white/30 uppercase tracking-widest">{t.role}</p>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </section>
-
-                  {/* CTA */}
-                  <section className="pb-32">
-                    <div className="p-12 rounded-3xl border border-cyan-400/20 bg-cyan-400/5 text-center">
-                      <h3 className="text-3xl font-display font-bold mb-4">Ready to build?</h3>
-                      <p className="text-white/40 mb-8 font-light">Get a free homepage mockup — no commitment required.</p>
-                      <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button onClick={() => setCurrentPage('book')} className="px-10 py-4 bg-white text-black rounded-full text-[10px] uppercase tracking-[0.3em] font-black hover:bg-cyan-400 transition-colors">Book a Meeting</button>
-                        <a href="https://calendly.com/admin-gitwix/30min" target="_blank" rel="noopener noreferrer" className="px-10 py-4 border border-white/20 rounded-full text-[10px] uppercase tracking-[0.3em] font-black hover:bg-white/5 transition-colors flex items-center justify-center gap-2">
-                          <CalendarDays className="w-4 h-4" /> Calendly
-                        </a>
-                      </div>
-                    </div>
-                  </section>
                 </div>
               </div>
+
+              {/* ===== CHAPTER 2: What We Build (Products Preview) ===== */}
+              <div className="flex flex-col lg:flex-row min-h-[200vh]">
+                {/* Left: Sticky product showcase */}
+                <div className="lg:w-1/2 lg:h-screen lg:sticky lg:top-0 flex flex-col justify-center px-8 lg:px-24">
+                  <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase mb-6 block">03 — What We Build</span>
+                  <h2 className="text-5xl lg:text-7xl font-display font-black mb-6 tracking-tight leading-[0.9]">
+                    Products that<br />
+                    <span className="text-outline italic">grow with you.</span>
+                  </h2>
+                  <p className="text-lg text-white/40 font-light max-w-md leading-relaxed">
+                    Every product includes a one-time build fee and optional monthly maintenance. Click any product to see full details and pricing.
+                  </p>
+                </div>
+
+                {/* Right: Product cards that scroll up */}
+                <div className="lg:w-1/2 px-8 lg:px-24 py-24 lg:py-48 space-y-12">
+                  {SERVICES.map((s, i) => (
+                    <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} viewport={{ once: true }} onClick={() => { setSelectedService(i); setCurrentPage('services'); }}>
+                      <div className="p-8 border border-white/10 rounded-2xl hover:border-cyan-400/30 cursor-pointer group transition-all">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="w-12 h-12 border border-white/10 rounded-full flex items-center justify-center group-hover:border-cyan-400 transition-colors">
+                            <s.icon className="w-5 h-5 text-white/40 group-hover:text-cyan-400" />
+                          </div>
+                          <span className="text-cyan-400 font-bold">{s.price}</span>
+                        </div>
+                        <h3 className="text-2xl font-display font-bold mb-2 group-hover:text-cyan-400 transition-colors">{s.title}</h3>
+                        <p className="text-white/40 font-light leading-relaxed mb-4">{s.desc}</p>
+                        <div className="flex items-center gap-2 mt-4 text-cyan-400 text-sm">
+                          <span>View details & pricing</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ===== CHAPTER 3: Client Stories ===== */}
+              <div className="flex flex-col lg:flex-row min-h-[150vh]">
+                {/* Left: Sticky headline */}
+                <div className="lg:w-1/2 lg:h-screen lg:sticky lg:top-0 flex flex-col justify-center px-8 lg:px-24">
+                  <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase mb-6 block">04 — Client Stories</span>
+                  <h2 className="text-5xl lg:text-7xl font-display font-black tracking-tight leading-[0.9]">
+                    Don't take<br />
+                    <span className="text-outline italic">our word.</span>
+                  </h2>
+                </div>
+
+                {/* Right: Testimonial cards scroll up */}
+                <div className="lg:w-1/2 px-8 lg:px-24 py-24 lg:py-48 space-y-12">
+                  {TESTIMONIALS.map((t, i) => (
+                    <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} viewport={{ once: true }} className="p-8 glass-panel rounded-2xl border border-white/5">
+                      <div className="flex gap-1 mb-4">{[...Array(5)].map((_, j) => <Star key={j} className="w-3 h-3 fill-cyan-400 text-cyan-400" />)}</div>
+                      <p className="text-white/60 font-light italic leading-relaxed mb-6">"{t.text}"</p>
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-widest">{t.name}</p>
+                        <p className="text-[10px] text-white/30 uppercase tracking-widest">{t.role}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ===== CHAPTER 4: CTA ===== */}
+              <section className="py-32 px-6 lg:px-24">
+                <div className="max-w-4xl mx-auto p-12 rounded-3xl border border-cyan-400/20 bg-cyan-400/5 text-center">
+                  <h3 className="text-3xl font-display font-bold mb-4">Ready to build?</h3>
+                  <p className="text-white/40 mb-8 font-light">Get a free homepage mockup — no commitment required.</p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onClick={() => setCurrentPage('book')} className="px-10 py-4 bg-white text-black rounded-full text-[10px] uppercase tracking-[0.3em] font-black hover:bg-cyan-400 transition-colors">Book a Meeting</button>
+                    <a href="https://calendly.com/admin-gitwix/30min" target="_blank" rel="noopener noreferrer" className="px-10 py-4 border border-white/20 rounded-full text-[10px] uppercase tracking-[0.3em] font-black hover:bg-white/5 transition-colors flex items-center justify-center gap-2">
+                      <CalendarDays className="w-4 h-4" /> Calendly
+                    </a>
+                  </div>
+                </div>
+              </section>
+
             </motion.div>
           )}
 
           {/* ==================== SERVICES ==================== */}
-          {currentPage === 'services' && (
+          {currentPage === 'services' && selectedService !== null && SERVICES[selectedService] && (() => {
+            const s = SERVICES[selectedService];
+            return (
+              <motion.div key="service-detail" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full">
+                <div className="flex flex-col lg:flex-row min-h-screen">
+                  {/* Left: Sticky panel with pricing summary + CTA */}
+                  <div className="lg:w-1/2 lg:h-screen lg:sticky lg:top-0 flex flex-col justify-center px-8 lg:px-24 py-24">
+                    <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }}>
+                      <button onClick={() => setSelectedService(null)} className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-white/40 hover:text-white transition-colors mb-12">
+                        <ArrowLeft className="w-4 h-4" /> Back to Services
+                      </button>
+                      <div className="w-16 h-16 border border-cyan-400/30 rounded-full flex items-center justify-center mb-8">
+                        <s.icon className="w-7 h-7 text-cyan-400" />
+                      </div>
+                      <h2 className="text-4xl lg:text-6xl font-display font-black mb-6 tracking-tight">{s.title}</h2>
+                      <div className="flex flex-wrap gap-6 mb-8 text-sm">
+                        <div>
+                          <span className="text-[10px] uppercase tracking-widest text-white/30 block mb-1">One-time build</span>
+                          <span className="text-2xl font-display font-black text-cyan-400">{s.price}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] uppercase tracking-widest text-white/30 block mb-1">Monthly</span>
+                          <span className="text-2xl font-display font-black">{s.monthly}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] uppercase tracking-widest text-white/30 block mb-1">Timeline</span>
+                          <span className="text-2xl font-display font-black">{s.buildTime}</span>
+                        </div>
+                      </div>
+                      <p className="text-lg text-white/40 font-light leading-relaxed mb-12">{s.desc}</p>
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <button onClick={() => setCurrentPage('book')} className="px-10 py-4 bg-white text-black rounded-full text-[10px] uppercase tracking-[0.3em] font-black hover:bg-cyan-400 transition-colors">Book a Meeting</button>
+                        <a href="https://gitwix.com/free-mockup" target="_blank" rel="noopener noreferrer" className="px-10 py-4 border border-white/20 rounded-full text-[10px] uppercase tracking-[0.3em] font-black hover:bg-white/5 transition-colors flex items-center justify-center gap-2">
+                          <ExternalLink className="w-4 h-4" /> Get Free Mockup
+                        </a>
+                      </div>
+                    </motion.div>
+                  </div>
+
+                  {/* Right: Scrolling content with included items */}
+                  <div className="lg:w-1/2 px-8 lg:px-24 py-24 lg:py-48 space-y-24">
+                    {/* What's Included (Build) */}
+                    <section>
+                      <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase mb-8 block">What's Included (Build)</span>
+                      <div className="space-y-4">
+                        {s.included.map((item, j) => (
+                          <motion.div key={j} initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} transition={{ delay: j * 0.05 }} viewport={{ once: true }} className="flex items-center gap-4 p-4 border border-white/5 rounded-xl hover:border-cyan-400/20 transition-colors">
+                            <Check className="w-5 h-5 text-cyan-400 shrink-0" />
+                            <span className="text-white/70 font-light">{item}</span>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </section>
+
+                    {/* Monthly Plan Includes */}
+                    <section>
+                      <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase mb-8 block">Monthly Plan Includes</span>
+                      <div className="space-y-4">
+                        {s.monthlyIncludes.map((item, j) => (
+                          <motion.div key={j} initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} transition={{ delay: j * 0.05 }} viewport={{ once: true }} className="flex items-center gap-4 p-4 border border-white/5 rounded-xl hover:border-cyan-400/20 transition-colors">
+                            <Check className="w-5 h-5 text-cyan-400 shrink-0" />
+                            <span className="text-white/70 font-light">{item}</span>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </section>
+
+                    {/* Features badges */}
+                    <section>
+                      <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase mb-8 block">Key Features</span>
+                      <div className="flex flex-wrap gap-3">
+                        {s.features.map((f, j) => (
+                          <span key={j} className="text-[10px] uppercase tracking-widest text-cyan-400 border border-cyan-400/20 px-4 py-2 rounded-full bg-cyan-400/5">{f}</span>
+                        ))}
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })()}
+          {currentPage === 'services' && selectedService === null && (
             <motion.div key="services" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full min-h-screen pt-36 lg:pt-48 px-6 lg:px-24 pb-32">
               <div className="max-w-7xl mx-auto">
                 <div className="mb-24">
@@ -942,7 +1231,7 @@ export default function App() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-white/5 border border-white/5 mb-32">
                   {SERVICES.map((s, i) => (
-                    <motion.div key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 0.8, delay: i * 0.1 }} className="bg-black p-10 lg:p-16 hover:bg-white/5 transition-all group border border-white/5">
+                    <motion.div key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 0.8, delay: i * 0.1 }} className="bg-black p-10 lg:p-16 hover:bg-white/5 transition-all group border border-white/5 cursor-pointer" onClick={() => setSelectedService(i)}>
                       <div className="flex items-center justify-between mb-8">
                         <div className="w-12 h-12 border border-white/10 rounded-full flex items-center justify-center group-hover:border-cyan-400 transition-colors">
                           <s.icon className="w-5 h-5 text-white/40 group-hover:text-cyan-400" />
@@ -951,10 +1240,14 @@ export default function App() {
                       </div>
                       <h3 className="text-2xl lg:text-3xl font-display font-bold mb-4 group-hover:text-cyan-400 transition-colors">{s.title}</h3>
                       <p className="text-white/40 font-light leading-relaxed mb-8">{s.desc}</p>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2 mb-4">
                         {s.features.map((f, j) => (
                           <span key={j} className="text-[9px] uppercase tracking-widest text-white/30 border border-white/10 px-3 py-1 rounded-full">{f}</span>
                         ))}
+                      </div>
+                      <div className="flex items-center gap-2 text-cyan-400 text-sm">
+                        <span>View details</span>
+                        <ChevronRight className="w-4 h-4" />
                       </div>
                     </motion.div>
                   ))}
