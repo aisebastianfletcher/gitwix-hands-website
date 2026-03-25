@@ -7,7 +7,7 @@ import { Hands, Results, HAND_CONNECTIONS } from '@mediapipe/hands';
 import { Camera } from '@mediapipe/camera_utils';
 import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
 import { Loader2, Hand, Sparkles, Globe, Layers, Mail, Activity, Zap, Shield, ArrowRight, ArrowLeft, ChevronRight, ExternalLink, Check, Star, Clock, Code, Palette, Search, Wrench, ShoppingCart, Smartphone, CalendarDays, Phone } from 'lucide-react';
-import { motion, AnimatePresence, useScroll, useSpring } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useSpring, useTransform, useMotionValueEvent } from 'motion/react';
 
 // --- CONSTANTS ---
 const PINCH_THRESHOLD = 0.04;
@@ -241,13 +241,62 @@ const VirtualCursor = ({ cursorPos, pinchProgress, interactionMode, clickFeedbac
 
 // --- TESTIMONIALS DATA ---
 const TESTIMONIALS = [
-  { text: "Working with this team transformed our online presence. The web application they built exceeded all expectations.", name: "Sarah Mitchell", role: "Marketing Director" },
-  { text: "The workflow automation saved us 20+ hours per week. Absolutely brilliant work and outstanding support.", name: "James Rodriguez", role: "Operations Manager" },
-  { text: "Sales have increased by 150% in the first quarter. Our e-commerce site is fast, beautiful, and easy to manage.", name: "Emma Thompson", role: "E-commerce Owner" },
-  { text: "The custom PWA works flawlessly on all devices. Our team productivity has improved significantly.", name: "Michael Chen", role: "CTO" },
-  { text: "Professional, responsive, and incredibly skilled. They delivered a complex platform on time and on budget.", name: "Lisa Anderson", role: "Healthcare Director" },
-  { text: "What used to take days now takes minutes. The automation workflows have revolutionized our client intake.", name: "David Park", role: "Legal Practice Manager" },
+  { quote: "Gitwix completely transformed our online presence. The site they built loads in under a second and our enquiries have tripled since launch. Genuinely the best investment we've made.", name: "Sarah Mitchell", role: "Marketing Director, CloudNine Digital", stars: 5 },
+  { quote: "We'd been burned by agencies before — Gitwix were the opposite. Transparent pricing, no outsourcing, and the final product was miles beyond the mockup. Absolutely class.", name: "James Hartley", role: "Founder, Hartley & Co Solicitors", stars: 5 },
+  { quote: "Our e-commerce revenue jumped 150% in the first quarter after launch. The site is fast, beautiful, and the monthly support means we never worry about downtime.", name: "Emma Sheridan", role: "Owner, Northern Luxe Interiors", stars: 5 },
+  { quote: "From brief to live in ten days — and zero revisions needed. The PWA they built works offline, scores 100 on Lighthouse, and our team actually enjoys using it.", name: "Michael Chen", role: "CTO, OpenClaw Developer", stars: 5 },
+  { quote: "Professional, responsive, and incredibly skilled. They automated our entire booking flow with AI and it's saved us 20+ hours a week. Can't recommend them enough.", name: "Lisa Sherwood", role: "Practice Manager, Deansgate Health", stars: 5 },
 ];
+
+// --- WHY GITWIX USP DATA ---
+const WHY_GITWIX = [
+  { num: "01", title: "No Outsourcing", desc: "All development is done in-house by our Manchester-based team. Your project never gets passed to unknown third parties — we own every line of code." },
+  { num: "02", title: "Free Mockup First", desc: "We design a custom homepage mockup before you pay anything. Love it? Buy it. Hate it? Walk away. Zero obligation, zero risk." },
+  { num: "03", title: "Transparent Pricing", desc: "No hidden fees, no surprises, no scope creep invoices. Configure and price your project instantly — what you see is what you pay." },
+  { num: "04", title: "Modern Tech Stack", desc: "React, Next.js, TypeScript, AWS. Built with the same tools that power the best products on the web — fast, scalable, future-proof." },
+  { num: "05", title: "SEO Built In", desc: "Every site includes on-page SEO, optimised meta tags, schema markup, and sub-second load times. Rank higher from day one." },
+];
+
+// --- STATS DATA ---
+const STATS = [
+  { target: 100, suffix: "+", label: "Projects Delivered" },
+  { target: 100, suffix: "%", label: "Client Satisfaction" },
+  { target: 100, suffix: "/100", label: "Lighthouse Scores" },
+  { target: 35, suffix: "%", label: "Avg. Conversion Increase" },
+];
+
+// --- COUNTUP COMPONENT ---
+function CountUp({ target, suffix = '' }: { target: number; suffix?: string }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    if (!ref.current || hasAnimated) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setHasAnimated(true);
+        const duration = 2000;
+        const steps = 60;
+        const increment = target / steps;
+        let current = 0;
+        const timer = setInterval(() => {
+          current += increment;
+          if (current >= target) {
+            setCount(target);
+            clearInterval(timer);
+          } else {
+            setCount(Math.floor(current));
+          }
+        }, duration / steps);
+      }
+    }, { threshold: 0.5 });
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [target, hasAnimated]);
+
+  return <span ref={ref}>{count}{suffix}</span>;
+}
 
 // --- SERVICES DATA ---
 const SERVICES = [
@@ -434,6 +483,435 @@ const PORTFOLIO = [
 ];
 
 
+
+// ============================
+// HOME PAGE CONTENT COMPONENT
+// ============================
+function HomePageContent({ setCurrentPage, setSelectedService }: { setCurrentPage: (p: Page) => void; setSelectedService: (i: number) => void }) {
+  // --- Section 1: Hero scroll-driven fade/blur/scale ---
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
+  const heroOpacity = useTransform(heroProgress, [0, 0.8], [1, 0]);
+  const heroScale = useTransform(heroProgress, [0, 0.8], [1, 0.95]);
+  const heroBlurRaw = useTransform(heroProgress, [0, 0.8], [0, 10]);
+
+  // --- Section 2: Stats vertical line growth ---
+  const statsRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: statsProgress } = useScroll({
+    target: statsRef,
+    offset: ["start end", "end start"]
+  });
+  const lineHeight = useTransform(statsProgress, [0, 1], ["0%", "100%"]);
+
+  // --- Section 3: Horizontal scroll ---
+  const hScrollRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: hScrollProgress } = useScroll({
+    target: hScrollRef,
+    offset: ["start start", "end end"]
+  });
+  const hScrollX = useTransform(hScrollProgress, [0, 1], ["0%", "-80%"]);
+
+  // --- Section 4: Products progress ---
+  const productsRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: productsProgress } = useScroll({
+    target: productsRef,
+    offset: ["start start", "end end"]
+  });
+  const [activeProduct, setActiveProduct] = useState(0);
+  useMotionValueEvent(productsProgress, "change", (latest) => {
+    const idx = Math.min(SERVICES.length - 1, Math.floor(latest * SERVICES.length));
+    setActiveProduct(idx);
+  });
+
+  // --- Section 5: Stacked testimonials ---
+  const testimonialsRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: testimonialsProgress } = useScroll({
+    target: testimonialsRef,
+    offset: ["start start", "end end"]
+  });
+
+  return (
+    <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full">
+
+      {/* ===== SECTION 1: Full-Screen Hero ===== */}
+      <div ref={heroRef} className="relative">
+        <motion.section
+          style={{
+            opacity: heroOpacity,
+            scale: heroScale,
+            filter: useTransform(heroBlurRaw, (v) => `blur(${v}px)`),
+          }}
+          className="h-screen flex flex-col items-center justify-center text-center px-6 lg:px-24 relative"
+        >
+          {/* Logo */}
+          <motion.img
+            src="/gitwixlogo.png"
+            alt="Gitwix"
+            className="w-20 h-20 lg:w-28 lg:h-28 object-contain mb-8"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          />
+
+          {/* Subtitle */}
+          <motion.span
+            className="text-cyan-400 font-mono text-[10px] lg:text-xs tracking-[0.5em] uppercase mb-8 block"
+            initial={{ opacity: 0, letterSpacing: "0.8em" }}
+            animate={{ opacity: 1, letterSpacing: "0.5em" }}
+            transition={{ duration: 1, delay: 0.4 }}
+          >
+            Web Developer in Manchester
+          </motion.span>
+
+          {/* Headlines */}
+          <div className="mb-8">
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.6 }}>
+              <ExplodingText text="BESPOKE" className="text-[12vw] lg:text-[7vw] font-display font-black leading-[0.85] tracking-tighter" />
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.8 }}>
+              <ExplodingText text="WEBSITES" className="text-[12vw] lg:text-[7vw] font-display font-black leading-[0.85] tracking-tighter text-outline italic" />
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 1.0 }}>
+              <ExplodingText text="THAT CONVERT." className="text-[12vw] lg:text-[7vw] font-display font-black leading-[0.85] tracking-tighter" />
+            </motion.div>
+          </div>
+
+          {/* Description */}
+          <motion.p
+            className="text-base lg:text-lg text-white/40 max-w-xl leading-relaxed font-light mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.2 }}
+          >
+            We design and build custom websites, e-commerce stores and web applications for businesses across the UK. Fast, SEO-optimised, and built to generate real enquiries — starting from £200.
+          </motion.p>
+
+          {/* CTAs */}
+          <motion.div
+            className="flex flex-col sm:flex-row gap-6 items-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.4 }}
+          >
+            <button onClick={() => setCurrentPage('book')} className="group flex items-center gap-4 text-sm font-bold tracking-[0.3em] uppercase">
+              <span>Book a meeting</span>
+              <div className="w-12 h-12 border border-white/20 rounded-full flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all duration-500 group-hover:scale-110">
+                <ArrowRight className="w-4 h-4" />
+              </div>
+            </button>
+            <a href="https://gitwix.com/free-mockup" target="_blank" rel="noopener noreferrer" className="group flex items-center gap-4 text-sm font-bold tracking-[0.3em] uppercase text-cyan-400">
+              <span>Free Mockup</span>
+              <ExternalLink className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            </a>
+          </motion.div>
+
+          {/* Scroll indicator */}
+          <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 scroll-indicator">
+            <span className="text-[9px] uppercase tracking-[0.4em] text-white/20 font-mono">Scroll</span>
+            <ChevronRight className="w-4 h-4 text-white/30 rotate-90" />
+          </div>
+        </motion.section>
+      </div>
+
+      {/* ===== SECTION 2: Stats Counter ===== */}
+      <section ref={statsRef} className="relative">
+        <div className="flex flex-col lg:flex-row min-h-[200vh]">
+          {/* Left: Sticky */}
+          <div className="lg:w-2/5 lg:h-screen lg:sticky lg:top-0 flex flex-col justify-center px-8 lg:px-24 py-24">
+            <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase mb-6 block">01 — Track Record</span>
+            <h2 className="text-6xl lg:text-8xl font-display font-black tracking-tighter leading-[0.85] mb-8">
+              Results that<br />
+              <span className="text-outline italic">speak.</span>
+            </h2>
+            {/* Growing vertical line */}
+            <div className="relative h-32 w-[2px] bg-white/5 overflow-hidden mt-8 hidden lg:block">
+              <motion.div
+                className="absolute top-0 left-0 w-full bg-cyan-400"
+                style={{ height: lineHeight }}
+              />
+            </div>
+          </div>
+
+          {/* Right: Scrolling stat cards with parallax */}
+          <div className="lg:w-3/5 px-8 lg:px-24 py-24 lg:py-48">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              {STATS.map((s, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 60 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: i * 0.15 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  className="p-10 border border-white/5 rounded-3xl hover:border-cyan-400/20 transition-all group"
+                >
+                  <h4 className="text-6xl lg:text-7xl font-display font-black mb-3 text-white group-hover:text-cyan-400 transition-colors">
+                    <CountUp target={s.target} suffix={s.suffix} />
+                  </h4>
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-white/30">{s.label}</p>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Expanding rule */}
+            <motion.div
+              className="h-[1px] bg-white/10 mt-24 mb-24 origin-left"
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+              viewport={{ once: true }}
+            />
+
+            {/* Additional context */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="max-w-md"
+            >
+              <p className="text-white/40 font-light leading-relaxed text-lg">
+                Every project is delivered on time, on budget, and built to the highest standards. Our clients stay because the results are undeniable.
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== SECTION 3: Horizontal Scroll — Why Gitwix ===== */}
+      <section ref={hScrollRef} style={{ height: '500vh' }} className="relative">
+        <div className="sticky top-0 h-screen overflow-hidden flex items-center">
+          {/* Section label */}
+          <div className="absolute top-24 left-8 lg:left-24 z-10">
+            <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase block">02 — Why Gitwix</span>
+          </div>
+
+          <motion.div
+            style={{ x: hScrollX }}
+            className="horizontal-scroll-container gap-8 pl-8 lg:pl-24 pr-[20vw]"
+          >
+            {WHY_GITWIX.map((card, i) => (
+              <motion.div
+                key={i}
+                className="min-w-[85vw] lg:min-w-[60vw] h-[70vh] p-12 lg:p-16 rounded-3xl border border-white/5 card-glow flex flex-col justify-between relative overflow-hidden"
+                initial={{ opacity: 0.3 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ duration: 0.6 }}
+              >
+                {/* Background number */}
+                <div className="number-outline absolute -top-6 -right-4 select-none pointer-events-none">
+                  {card.num}
+                </div>
+
+                <div className="relative z-10 mt-auto">
+                  <span className="text-cyan-400 font-mono text-[11px] tracking-[0.4em] uppercase mb-4 block">{card.num}</span>
+                  <h3 className="text-4xl lg:text-6xl font-display font-black mb-6 tracking-tight leading-[0.9]">
+                    {card.title}
+                  </h3>
+                  <p className="text-white/40 font-light leading-relaxed text-lg max-w-lg">
+                    {card.desc}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ===== SECTION 4: Products ===== */}
+      <section ref={productsRef} className="relative">
+        <div className="flex flex-col lg:flex-row min-h-[300vh]">
+          {/* Left: Sticky with progress dots */}
+          <div className="lg:w-2/5 lg:h-screen lg:sticky lg:top-0 flex flex-col justify-center px-8 lg:px-24 py-24">
+            <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase mb-6 block">03 — What We Build</span>
+            <h2 className="text-5xl lg:text-7xl font-display font-black mb-6 tracking-tight leading-[0.9]">
+              Products that<br />
+              <span className="text-outline italic">grow with you.</span>
+            </h2>
+            <p className="text-lg text-white/40 font-light max-w-md leading-relaxed mb-8">
+              One-time build + monthly maintenance. Click any product to see full details and pricing.
+            </p>
+
+            {/* Progress dots */}
+            <div className="hidden lg:flex flex-col gap-3 mt-4">
+              {SERVICES.map((_, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className={`w-2 h-2 rounded-full transition-all duration-500 ${i === activeProduct ? 'bg-cyan-400 scale-125' : 'bg-white/10'}`} />
+                  <span className={`text-[10px] uppercase tracking-widest transition-colors duration-500 ${i === activeProduct ? 'text-white' : 'text-white/20'}`}>
+                    {SERVICES[i].title}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Floating logo */}
+            <img src="/gitwixlogo.png" alt="" className="w-10 h-10 mt-8 opacity-20 hidden lg:block" />
+          </div>
+
+          {/* Right: Product cards with reveal animations */}
+          <div className="lg:w-3/5 px-8 lg:px-24 py-24 lg:py-48 space-y-16">
+            {SERVICES.map((s, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 60, rotateX: 5 }}
+                whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+                transition={{ duration: 0.8, delay: 0.1 }}
+                viewport={{ once: true, margin: "-80px" }}
+                onClick={() => { setSelectedService(i); setCurrentPage('services'); }}
+                className="cursor-pointer"
+                style={{ perspective: 800 }}
+              >
+                <div className="p-8 lg:p-10 border border-white/10 rounded-2xl hover:border-cyan-400/30 group transition-all card-glow">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="w-12 h-12 border border-white/10 rounded-full flex items-center justify-center group-hover:border-cyan-400 transition-colors">
+                      <s.icon className="w-5 h-5 text-white/40 group-hover:text-cyan-400" />
+                    </div>
+                    <span className="text-cyan-400 font-bold text-lg">{s.price}</span>
+                  </div>
+                  <h3 className="text-2xl lg:text-3xl font-display font-bold mb-2 group-hover:text-cyan-400 transition-colors">{s.title}</h3>
+                  <p className="text-white/40 font-light leading-relaxed mb-4">{s.desc}</p>
+                  <div className="flex items-center justify-between mt-6">
+                    <span className="text-[10px] uppercase tracking-widest text-white/20">{s.monthly} · {s.buildTime}</span>
+                    <div className="flex items-center gap-2 text-cyan-400 text-sm">
+                      <span>View details</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== SECTION 5: Stacked Testimonials ===== */}
+      <section ref={testimonialsRef} style={{ height: `${TESTIMONIALS.length * 80}vh` }} className="relative">
+        <div className="sticky top-0 h-screen flex flex-col items-center justify-center px-6 lg:px-24">
+          {/* Section label */}
+          <div className="absolute top-24 left-8 lg:left-24">
+            <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase block">04 — Client Stories</span>
+          </div>
+
+          {/* Card stack */}
+          <div className="relative w-full max-w-2xl">
+            {TESTIMONIALS.map((t, i) => {
+              const cardStart = i / TESTIMONIALS.length;
+              const cardEnd = (i + 1) / TESTIMONIALS.length;
+              return (
+                <TestimonialCard
+                  key={i}
+                  testimonial={t}
+                  index={i}
+                  scrollProgress={testimonialsProgress}
+                  start={cardStart}
+                  end={cardEnd}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== SECTION 6: Full-Screen CTA ===== */}
+      <section className="relative h-screen flex items-center justify-center px-6 lg:px-24 overflow-hidden">
+        {/* Gradient pulse background */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ animation: 'gradientPulse 4s ease-in-out infinite' }}
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,255,255,0.08),transparent_70%)]" />
+        </div>
+
+        <div className="relative z-10 text-center max-w-3xl">
+          <motion.h2
+            className="text-5xl lg:text-8xl font-display font-black mb-8 tracking-tight leading-[0.9]"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1 }}
+            viewport={{ once: true }}
+          >
+            Ready to<br />
+            <span className="text-outline italic">build?</span>
+          </motion.h2>
+          <motion.p
+            className="text-white/40 mb-12 font-light text-lg max-w-lg mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            Get a free homepage mockup — no commitment required. See what we can build for your business before you spend a penny.
+          </motion.p>
+          <motion.div
+            className="flex flex-col sm:flex-row gap-6 justify-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            viewport={{ once: true }}
+          >
+            <button onClick={() => setCurrentPage('book')} className="px-12 py-5 bg-white text-black rounded-full text-[10px] uppercase tracking-[0.3em] font-black hover:bg-cyan-400 hover:scale-105 transition-all">
+              Book a Meeting
+            </button>
+            <a href="https://calendly.com/admin-gitwix/30min" target="_blank" rel="noopener noreferrer" className="px-12 py-5 border border-white/20 rounded-full text-[10px] uppercase tracking-[0.3em] font-black hover:bg-white/5 transition-colors flex items-center justify-center gap-2">
+              <CalendarDays className="w-4 h-4" /> Calendly
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
+    </motion.div>
+  );
+}
+
+// --- Testimonial Card sub-component (avoids hooks-in-map issue) ---
+function TestimonialCard({
+  testimonial,
+  index,
+  scrollProgress,
+  start,
+  end,
+}: {
+  testimonial: typeof TESTIMONIALS[number];
+  index: number;
+  scrollProgress: any;
+  start: number;
+  end: number;
+}) {
+  const opacity = useTransform(
+    scrollProgress,
+    [start, start + 0.05, end - 0.05, end],
+    [0, 1, 1, 0]
+  );
+  const y = useTransform(scrollProgress, [start, end], [60, -60]);
+  const scale = useTransform(
+    scrollProgress,
+    [start, start + 0.1, end - 0.1, end],
+    [0.9, 1, 1, 0.9]
+  );
+
+  return (
+    <motion.div
+      style={{ opacity, y, scale, position: 'absolute', top: 0, left: 0, right: 0 }}
+      className="w-full p-10 lg:p-12 glass-panel rounded-3xl border border-white/10"
+    >
+      <div className="flex gap-1 mb-6">
+        {[...Array(testimonial.stars)].map((_, j) => (
+          <Star key={j} className="w-4 h-4 fill-cyan-400 text-cyan-400" />
+        ))}
+      </div>
+      <p className="text-white/70 font-light italic leading-relaxed text-lg mb-8">
+        "{testimonial.quote}"
+      </p>
+      <div>
+        <p className="text-sm font-bold uppercase tracking-widest">{testimonial.name}</p>
+        <p className="text-[10px] text-white/30 uppercase tracking-widest mt-1">{testimonial.role}</p>
+      </div>
+    </motion.div>
+  );
+}
 
 // ============================
 // MAIN APP
@@ -978,162 +1456,7 @@ export default function App() {
 
           {/* ==================== HOME ==================== */}
           {currentPage === 'home' && (
-            <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full">
-
-              {/* ===== CHAPTER 1: Hero ===== */}
-              <div className="flex flex-col lg:flex-row min-h-[200vh]">
-                {/* Left: Sticky hero with logo */}
-                <div className="lg:w-1/2 lg:h-screen lg:sticky lg:top-0 flex flex-col justify-center px-8 lg:px-24 py-24">
-                  <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2 }}>
-                    <img src="/gitwixlogo.png" alt="" className="w-16 h-16 mb-8 opacity-80" />
-                    <span className="text-cyan-400 font-mono text-[10px] tracking-[0.5em] uppercase mb-8 block">Web Developer in Manchester</span>
-                    <div className="mb-12">
-                      <ExplodingText text="BESPOKE" className="text-[10vw] lg:text-[5.5vw] font-display font-black leading-[0.85] tracking-tighter" />
-                      <ExplodingText text="WEBSITES" className="text-[10vw] lg:text-[5.5vw] font-display font-black leading-[0.85] tracking-tighter text-outline italic" />
-                      <ExplodingText text="THAT CONVERT." className="text-[10vw] lg:text-[5.5vw] font-display font-black leading-[0.85] tracking-tighter" />
-                    </div>
-                    <p className="text-lg text-white/40 max-w-md leading-relaxed font-light mb-12">
-                      We design and build custom websites, e-commerce stores and web applications for businesses across the UK. Fast, SEO-optimised, and built to generate real enquiries — starting from £200.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <button onClick={() => setCurrentPage('book')} className="group flex items-center gap-4 text-sm font-bold tracking-[0.3em] uppercase">
-                        <span>Book a meeting</span>
-                        <div className="w-12 h-12 border border-white/20 rounded-full flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all duration-500 group-hover:scale-110">
-                          <ArrowRight className="w-4 h-4" />
-                        </div>
-                      </button>
-                      <a href="https://gitwix.com/free-mockup" target="_blank" rel="noopener noreferrer" className="group flex items-center gap-4 text-sm font-bold tracking-[0.3em] uppercase text-cyan-400">
-                        <span>Free Mockup</span>
-                        <ExternalLink className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                      </a>
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* Right: Scrolling stats + USPs */}
-                <div className="lg:w-1/2 px-8 lg:px-24 py-24 lg:py-48 space-y-48">
-                  {/* Stats section */}
-                  <section>
-                    <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase mb-12 block">01 — Track Record</span>
-                    <div className="grid grid-cols-2 gap-8">
-                      {[
-                        { stat: "100+", label: "Projects Delivered" },
-                        { stat: "100%", label: "Client Satisfaction" },
-                        { stat: "100/100", label: "Lighthouse Scores" },
-                        { stat: "35%", label: "Avg. Conversion Increase" },
-                      ].map((s, i) => (
-                        <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}>
-                          <h4 className="text-5xl font-display font-black mb-2">{s.stat}</h4>
-                          <p className="text-[10px] uppercase tracking-widest text-white/30">{s.label}</p>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </section>
-
-                  {/* USPs */}
-                  <section>
-                    <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase mb-12 block">02 — Why Gitwix</span>
-                    <div className="space-y-8">
-                      {[
-                        { title: "No Outsourcing", desc: "All development is done in-house. Your project never gets passed to unknown third parties." },
-                        { title: "Free Mockup First", desc: "We design a custom homepage mockup before you pay anything. Love it? Buy it. No obligation." },
-                        { title: "Transparent Pricing", desc: "No hidden fees, no surprises. Configure and price your project instantly online." },
-                        { title: "Modern Tech Stack", desc: "React, Next.js, TypeScript, AWS. Built with the tools that power the best sites on the web." },
-                        { title: "SEO Built In", desc: "Every website includes on-page SEO, optimised meta tags, schema markup, and fast load times." },
-                      ].map((item, i) => (
-                        <motion.div key={i} initial={{ opacity: 0, x: 40 }} whileInView={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }} className="group border-b border-white/5 pb-8">
-                          <div className="flex items-start gap-4">
-                            <Check className="w-5 h-5 text-cyan-400 mt-1 shrink-0" />
-                            <div>
-                              <h3 className="text-xl font-bold mb-2 group-hover:text-cyan-400 transition-colors">{item.title}</h3>
-                              <p className="text-white/40 font-light leading-relaxed">{item.desc}</p>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </section>
-                </div>
-              </div>
-
-              {/* ===== CHAPTER 2: What We Build (Products Preview) ===== */}
-              <div className="flex flex-col lg:flex-row min-h-[200vh]">
-                {/* Left: Sticky product showcase */}
-                <div className="lg:w-1/2 lg:h-screen lg:sticky lg:top-0 flex flex-col justify-center px-8 lg:px-24">
-                  <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase mb-6 block">03 — What We Build</span>
-                  <h2 className="text-5xl lg:text-7xl font-display font-black mb-6 tracking-tight leading-[0.9]">
-                    Products that<br />
-                    <span className="text-outline italic">grow with you.</span>
-                  </h2>
-                  <p className="text-lg text-white/40 font-light max-w-md leading-relaxed">
-                    Every product includes a one-time build fee and optional monthly maintenance. Click any product to see full details and pricing.
-                  </p>
-                </div>
-
-                {/* Right: Product cards that scroll up */}
-                <div className="lg:w-1/2 px-8 lg:px-24 py-24 lg:py-48 space-y-12">
-                  {SERVICES.map((s, i) => (
-                    <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} viewport={{ once: true }} onClick={() => { setSelectedService(i); setCurrentPage('services'); }}>
-                      <div className="p-8 border border-white/10 rounded-2xl hover:border-cyan-400/30 cursor-pointer group transition-all">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="w-12 h-12 border border-white/10 rounded-full flex items-center justify-center group-hover:border-cyan-400 transition-colors">
-                            <s.icon className="w-5 h-5 text-white/40 group-hover:text-cyan-400" />
-                          </div>
-                          <span className="text-cyan-400 font-bold">{s.price}</span>
-                        </div>
-                        <h3 className="text-2xl font-display font-bold mb-2 group-hover:text-cyan-400 transition-colors">{s.title}</h3>
-                        <p className="text-white/40 font-light leading-relaxed mb-4">{s.desc}</p>
-                        <div className="flex items-center gap-2 mt-4 text-cyan-400 text-sm">
-                          <span>View details & pricing</span>
-                          <ChevronRight className="w-4 h-4" />
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-
-              {/* ===== CHAPTER 3: Client Stories ===== */}
-              <div className="flex flex-col lg:flex-row min-h-[150vh]">
-                {/* Left: Sticky headline */}
-                <div className="lg:w-1/2 lg:h-screen lg:sticky lg:top-0 flex flex-col justify-center px-8 lg:px-24">
-                  <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase mb-6 block">04 — Client Stories</span>
-                  <h2 className="text-5xl lg:text-7xl font-display font-black tracking-tight leading-[0.9]">
-                    Don't take<br />
-                    <span className="text-outline italic">our word.</span>
-                  </h2>
-                </div>
-
-                {/* Right: Testimonial cards scroll up */}
-                <div className="lg:w-1/2 px-8 lg:px-24 py-24 lg:py-48 space-y-12">
-                  {TESTIMONIALS.map((t, i) => (
-                    <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} viewport={{ once: true }} className="p-8 glass-panel rounded-2xl border border-white/5">
-                      <div className="flex gap-1 mb-4">{[...Array(5)].map((_, j) => <Star key={j} className="w-3 h-3 fill-cyan-400 text-cyan-400" />)}</div>
-                      <p className="text-white/60 font-light italic leading-relaxed mb-6">"{t.text}"</p>
-                      <div>
-                        <p className="text-xs font-bold uppercase tracking-widest">{t.name}</p>
-                        <p className="text-[10px] text-white/30 uppercase tracking-widest">{t.role}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-
-              {/* ===== CHAPTER 4: CTA ===== */}
-              <section className="py-32 px-6 lg:px-24">
-                <div className="max-w-4xl mx-auto p-12 rounded-3xl border border-cyan-400/20 bg-cyan-400/5 text-center">
-                  <h3 className="text-3xl font-display font-bold mb-4">Ready to build?</h3>
-                  <p className="text-white/40 mb-8 font-light">Get a free homepage mockup — no commitment required.</p>
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button onClick={() => setCurrentPage('book')} className="px-10 py-4 bg-white text-black rounded-full text-[10px] uppercase tracking-[0.3em] font-black hover:bg-cyan-400 transition-colors">Book a Meeting</button>
-                    <a href="https://calendly.com/admin-gitwix/30min" target="_blank" rel="noopener noreferrer" className="px-10 py-4 border border-white/20 rounded-full text-[10px] uppercase tracking-[0.3em] font-black hover:bg-white/5 transition-colors flex items-center justify-center gap-2">
-                      <CalendarDays className="w-4 h-4" /> Calendly
-                    </a>
-                  </div>
-                </div>
-              </section>
-
-            </motion.div>
+            <HomePageContent setCurrentPage={setCurrentPage} setSelectedService={setSelectedService} />
           )}
 
           {/* ==================== SERVICES ==================== */}
