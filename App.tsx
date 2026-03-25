@@ -526,12 +526,7 @@ function HomePageContent({ setCurrentPage, setSelectedService }: { setCurrentPag
     setActiveProduct(idx);
   });
 
-  // --- Section 5: Stacked testimonials ---
-  const testimonialsRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress: testimonialsProgress } = useScroll({
-    target: testimonialsRef,
-    offset: ["start start", "end end"]
-  });
+  // --- Section 5: Testimonials (whileInView) ---
 
   return (
     <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full">
@@ -787,31 +782,35 @@ function HomePageContent({ setCurrentPage, setSelectedService }: { setCurrentPag
         </div>
       </section>
 
-      {/* ===== SECTION 5: Stacked Testimonials ===== */}
-      <section ref={testimonialsRef} style={{ height: `${TESTIMONIALS.length * 50}vh` }} className="relative">
-        <div className="sticky top-0 h-screen flex flex-col items-center justify-center px-6 lg:px-24">
-          {/* Section label */}
-          <div className="absolute top-24 left-8 lg:left-24">
-            <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase block">04 — Client Stories</span>
-          </div>
-
-          {/* Card stack */}
-          <div className="relative w-full max-w-2xl">
-            {TESTIMONIALS.map((t, i) => {
-              const cardStart = i / TESTIMONIALS.length;
-              const cardEnd = (i + 1) / TESTIMONIALS.length;
-              return (
-                <TestimonialCard
-                  key={i}
-                  testimonial={t}
-                  index={i}
-                  scrollProgress={testimonialsProgress}
-                  start={cardStart}
-                  end={cardEnd}
-                />
-              );
-            })}
-          </div>
+      {/* ===== SECTION 5: Testimonials ===== */}
+      <section className="relative py-32 px-6 lg:px-24">
+        <div className="mb-16">
+          <span className="text-[10px] font-mono tracking-[0.4em] text-white/20 uppercase block">04 — Client Stories</span>
+        </div>
+        <div className="flex flex-col items-center gap-8">
+          {TESTIMONIALS.map((t, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true, amount: 0.3 }}
+              className="w-full max-w-2xl border border-white/10 rounded-2xl p-8 lg:p-12 glass-panel"
+            >
+              <div className="flex gap-1 mb-6">
+                {[...Array(t.stars)].map((_, j) => (
+                  <Star key={j} className="w-4 h-4 fill-cyan-400 text-cyan-400" />
+                ))}
+              </div>
+              <p className="text-white/70 font-light italic leading-relaxed text-lg mb-8">
+                "{t.quote}"
+              </p>
+              <div>
+                <p className="text-sm font-bold uppercase tracking-widest">{t.name}</p>
+                <p className="text-[10px] text-white/30 uppercase tracking-widest mt-1">{t.role}</p>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </section>
 
@@ -866,64 +865,7 @@ function HomePageContent({ setCurrentPage, setSelectedService }: { setCurrentPag
   );
 }
 
-// --- Testimonial Card sub-component (avoids hooks-in-map issue) ---
-function TestimonialCard({
-  testimonial,
-  index,
-  scrollProgress,
-  start,
-  end,
-}: {
-  testimonial: typeof TESTIMONIALS[number];
-  index: number;
-  scrollProgress: any;
-  start: number;
-  end: number;
-}) {
-  const segment = end - start;
-  const fadeIn = start;
-  const fadeInEnd = Math.min(1, start + segment * 0.15);
-  const fadeOutStart = Math.max(0, end - segment * 0.15);
-  const fadeOut = end;
-  const opacity = useTransform(
-    scrollProgress,
-    [fadeIn, fadeInEnd, fadeOutStart, fadeOut],
-    [0, 1, 1, 0],
-    { clamp: true }
-  );
-  const y = useTransform(
-    scrollProgress,
-    [fadeIn, fadeInEnd, fadeOutStart, fadeOut],
-    [40, 0, 0, -40],
-    { clamp: true }
-  );
-  const scale = useTransform(
-    scrollProgress,
-    [fadeIn, fadeInEnd, fadeOutStart, fadeOut],
-    [0.95, 1, 1, 0.95],
-    { clamp: true }
-  );
 
-  return (
-    <motion.div
-      style={{ opacity, y, scale, position: 'absolute', top: 0, left: 0, right: 0 }}
-      className="w-full p-10 lg:p-12 glass-panel rounded-3xl border border-white/10"
-    >
-      <div className="flex gap-1 mb-6">
-        {[...Array(testimonial.stars)].map((_, j) => (
-          <Star key={j} className="w-4 h-4 fill-cyan-400 text-cyan-400" />
-        ))}
-      </div>
-      <p className="text-white/70 font-light italic leading-relaxed text-lg mb-8">
-        "{testimonial.quote}"
-      </p>
-      <div>
-        <p className="text-sm font-bold uppercase tracking-widest">{testimonial.name}</p>
-        <p className="text-[10px] text-white/30 uppercase tracking-widest mt-1">{testimonial.role}</p>
-      </div>
-    </motion.div>
-  );
-}
 
 // ============================
 // MAIN APP
@@ -1295,7 +1237,7 @@ export default function App() {
   return (
     <div className="relative w-full min-h-screen bg-black text-white selection:bg-white/30 overflow-x-hidden font-sans">
       {/* Three.js Background */}
-      <div className="fixed inset-0 z-[1] pointer-events-none">
+      <div className="fixed inset-0 z-[0] pointer-events-none">
         <Canvas><Suspense fallback={null}><Scene scrollProgress={scrollYProgress} cursorPos={cursorPos} currentPage={currentPage} /></Suspense></Canvas>
       </div>
 
@@ -1463,7 +1405,7 @@ export default function App() {
       </nav>
 
       {/* ===== MAIN CONTENT ===== */}
-      <main className={`relative z-[2] transition-opacity duration-1000 ${mode === 'intro' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      <main className={`relative z-[5] transition-opacity duration-1000 ${mode === 'intro' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <AnimatePresence mode="wait">
 
           {/* ==================== HOME ==================== */}
@@ -1799,7 +1741,7 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-[2] py-16 border-t border-white/5">
+      <footer className="relative z-[5] py-16 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6 lg:px-24">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             <div className="flex items-center gap-8">
