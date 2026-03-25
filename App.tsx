@@ -640,7 +640,7 @@ function HomePageContent({ setCurrentPage, setSelectedService }: { setCurrentPag
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: i * 0.15 }}
                   viewport={{ once: true, margin: "-100px" }}
-                  className="p-10 border border-white/5 rounded-3xl hover:border-cyan-400/20 transition-all group"
+                  className="p-10 border border-white/5 rounded-3xl hover:border-cyan-400/20 transition-all group bg-black/90"
                 >
                   <h4 className="text-6xl lg:text-7xl font-display font-black mb-3 text-white group-hover:text-cyan-400 transition-colors">
                     <CountUp target={s.target} suffix={s.suffix} />
@@ -1237,7 +1237,7 @@ export default function App() {
   return (
     <div className="relative w-full min-h-screen bg-black text-white selection:bg-white/30 overflow-x-hidden font-sans">
       {/* Three.js Background */}
-      <div className="fixed inset-0 z-[0] pointer-events-none">
+      <div className="fixed inset-0 z-[0] pointer-events-none opacity-30">
         <Canvas><Suspense fallback={null}><Scene scrollProgress={scrollYProgress} cursorPos={cursorPos} currentPage={currentPage} /></Suspense></Canvas>
       </div>
 
