@@ -101,7 +101,7 @@ function MorphingSphere({ scrollProgress, cursorPos, targetColor }: { scrollProg
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
       </bufferGeometry>
-      <pointsMaterial ref={materialRef} size={0.06} color="#00ffff" transparent opacity={0.9} sizeAttenuation blending={THREE.AdditiveBlending} depthWrite={false} />
+      <pointsMaterial ref={materialRef} size={0.04} color="#00ffff" transparent opacity={0.35} sizeAttenuation blending={THREE.AdditiveBlending} depthWrite={false} />
     </points>
   );
 }
@@ -1237,7 +1237,7 @@ export default function App() {
   return (
     <div className="relative w-full min-h-screen bg-black text-white selection:bg-white/30 overflow-x-hidden font-sans">
       {/* Three.js Background */}
-      <div className="fixed inset-0 z-[0] pointer-events-none" style={{ opacity: 0.2 }}>
+      <div className="fixed inset-0 z-[0] pointer-events-none" style={{ opacity: 0.15 }}>
         <Canvas><Suspense fallback={null}><Scene scrollProgress={scrollYProgress} cursorPos={cursorPos} currentPage={currentPage} /></Suspense></Canvas>
       </div>
 
