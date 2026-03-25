@@ -821,7 +821,7 @@ export default function App() {
             </div>
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} className="relative z-10 text-center px-6 max-w-4xl">
               <div className="mb-8 flex flex-col items-center gap-6">
-                <img src="/gitwixlogo.jpg" alt="Gitwix" className="w-24 h-24 lg:w-32 lg:h-32 object-contain" />
+                <img src="/gitwixlogo.png" alt="Gitwix" className="w-24 h-24 lg:w-32 lg:h-32 object-contain" />
                 <h2 className="text-[16vw] lg:text-[10vw] font-display font-black leading-none tracking-tighter text-white">GITWIX</h2>
               </div>
               <div className="text-white/40 font-mono text-[10px] tracking-[0.6em] uppercase mb-8">Web Developer &bull; Manchester, Deansgate</div>
@@ -959,7 +959,7 @@ export default function App() {
       {/* Navigation */}
       <nav className={`fixed top-0 left-0 right-0 z-40 px-6 lg:px-12 py-6 lg:py-10 flex items-center justify-between transition-all duration-1000 ${mode === 'intro' ? 'opacity-0 -translate-y-10' : 'opacity-100 translate-y-0'}`}>
         <div className="cursor-pointer flex items-center gap-3 group" onClick={() => setCurrentPage('home')}>
-          <img src="/gitwixlogo.jpg" alt="Gitwix" className="w-8 h-8 object-contain" />
+          <img src="/gitwixlogo.png" alt="Gitwix" className="w-8 h-8 object-contain" />
           <span className="tracking-[0.2em] font-sans font-black text-sm">GITWIX</span>
         </div>
         <div className="flex items-center space-x-6 lg:space-x-12">
@@ -985,7 +985,7 @@ export default function App() {
                 {/* Left: Sticky hero with logo */}
                 <div className="lg:w-1/2 lg:h-screen lg:sticky lg:top-0 flex flex-col justify-center px-8 lg:px-24 py-24">
                   <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2 }}>
-                    <img src="/gitwixlogo.jpg" alt="" className="w-16 h-16 mb-8 opacity-80" />
+                    <img src="/gitwixlogo.png" alt="" className="w-16 h-16 mb-8 opacity-80" />
                     <span className="text-cyan-400 font-mono text-[10px] tracking-[0.5em] uppercase mb-8 block">Web Developer in Manchester</span>
                     <div className="mb-12">
                       <ExplodingText text="BESPOKE" className="text-[10vw] lg:text-[5.5vw] font-display font-black leading-[0.85] tracking-tighter" />
