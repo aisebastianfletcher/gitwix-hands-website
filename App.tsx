@@ -636,7 +636,7 @@ function HomePageContent({ setCurrentPage, setSelectedService }: { setCurrentPag
           </div>
 
           {/* Right: Scrolling stat cards with parallax */}
-          <div className="lg:w-3/5 px-8 lg:px-24 py-24 lg:py-48">
+          <div className="lg:w-3/5 px-8 lg:px-24 py-24 lg:py-48 relative z-10">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               {STATS.map((s, i) => (
                 <motion.div
@@ -681,7 +681,7 @@ function HomePageContent({ setCurrentPage, setSelectedService }: { setCurrentPag
       </section>
 
       {/* ===== SECTION 3: Horizontal Scroll — Why Gitwix ===== */}
-      <section ref={hScrollRef} style={{ height: '500vh' }} className="relative">
+      <section ref={hScrollRef} style={{ height: '350vh' }} className="relative">
         <div className="sticky top-0 h-screen overflow-hidden flex items-center">
           {/* Section label */}
           <div className="absolute top-24 left-8 lg:left-24 z-10">
@@ -788,7 +788,7 @@ function HomePageContent({ setCurrentPage, setSelectedService }: { setCurrentPag
       </section>
 
       {/* ===== SECTION 5: Stacked Testimonials ===== */}
-      <section ref={testimonialsRef} style={{ height: `${TESTIMONIALS.length * 80}vh` }} className="relative">
+      <section ref={testimonialsRef} style={{ height: `${TESTIMONIALS.length * 60}vh` }} className="relative">
         <div className="sticky top-0 h-screen flex flex-col items-center justify-center px-6 lg:px-24">
           {/* Section label */}
           <div className="absolute top-24 left-8 lg:left-24">
@@ -880,16 +880,23 @@ function TestimonialCard({
   start: number;
   end: number;
 }) {
+  const overlap = 0.05;
+  const fadeIn = Math.max(0, start - overlap);
+  const fadeInEnd = Math.min(1, start + 0.03);
+  const fadeOutStart = Math.max(0, end - 0.03);
+  const fadeOut = Math.min(1, end + overlap);
   const opacity = useTransform(
     scrollProgress,
-    [start, start + 0.05, end - 0.05, end],
-    [0, 1, 1, 0]
+    [fadeIn, fadeInEnd, fadeOutStart, fadeOut],
+    [0, 1, 1, 0],
+    { clamp: true }
   );
-  const y = useTransform(scrollProgress, [start, end], [60, -60]);
+  const y = useTransform(scrollProgress, [fadeIn, fadeOut], [60, -60]);
   const scale = useTransform(
     scrollProgress,
-    [start, start + 0.1, end - 0.1, end],
-    [0.9, 1, 1, 0.9]
+    [fadeIn, fadeInEnd, fadeOutStart, fadeOut],
+    [0.92, 1, 1, 0.92],
+    { clamp: true }
   );
 
   return (
